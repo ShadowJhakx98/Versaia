@@ -1,0 +1,1201 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart UI Dashboard</title>
+    <script src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@mui/material@5.14.2/umd/material-ui.development.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.11.3/main.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        /* Status Bar Styles */
+        .status-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #2196f3;
+            color: white;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .status-bar-content {
+            display: flex;
+            align-items: center;
+        }
+
+        .notification-icon {
+            cursor: pointer;
+            margin-left: 15px;
+        }
+
+        /* Notification Drawer Styles */
+        .notification-drawer {
+            position: fixed;
+            top: -100%;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: top 0.3s ease-in-out;
+            z-index: 999;
+            overflow-y: auto;
+        }
+
+        .notification-drawer.open {
+            top: 0;
+        }
+
+        .notification-header {
+            background-color: #2196f3;
+            color: white;
+            padding: 20px;
+            font-size: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-drawer {
+            cursor: pointer;
+            font-size: 24px;
+        }
+
+        /* Updated Notification Styles */
+        .notification-list {
+            padding: 20px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            background-color: #f5f5f5;
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notification-content {
+            flex-grow: 1;
+        }
+
+        .notification-close {
+            cursor: pointer;
+            font-size: 18px;
+            color: #888;
+        }
+
+        .notification-icon {
+            position: relative;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: red;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+        }
+        
+        /* Spotify Player Styles */
+        .spotify-player {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #191414;
+            border-radius: 8px;
+        }
+
+        .spotify-player h3 {
+            color: #1DB954;
+            margin-bottom: 10px;
+        }
+
+        body, html {
+            padding-top: 50px; /* Height of the status bar */
+            font-family: 'Open Sans', sans-serif;
+            background-color: #1f1f1f;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            flex-direction: column;
+            justify-content: space-between;
+
+        }
+        
+        .dashboard-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Search bar styling */
+        .search-bar {
+            top: 50px; /* Push down by the height of the status bar */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #fff;
+            padding: 10px 0;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .search-bar input[type="text"] {
+            width: 60%;
+            padding: 12px 20px;
+            border-radius: 24px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            outline: none;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .search-bar input[type="text"]:focus {
+            border-color: #4285f4;
+        }
+
+        .search-bar input[type="submit"] {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin-left: 10px;
+            border-radius: 24px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .search-bar input[type="submit"]:hover {
+            background-color: #357ae8;
+        }
+
+        .sidebar {
+            background-color: #2c3e50;
+            width: 80px;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: auto;
+            transition: width 0.3s ease;
+            min-width: 80px; /* Ensure a minimum width */
+            flex-shrink: 0; /* Prevent sidebar from shrinking */
+            margin-top: 20px; /* Space between search bar and slideshow */
+        }
+
+        .sidebar.expanded {
+            width: 300px;
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 0;
+            width: 100%;
+            flex-grow: 1; /* Allow nav list to expand within the sidebar */
+        }
+        
+        .nav-list li {
+            margin: 15px 0;
+        }
+        
+        .nav-list a {
+            text-decoration: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            border-radius: 8px;
+            background-color: #34495e;
+            transition: background-color 0.3s ease, padding 0.3s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            font-size: 18px;
+            width: 90%;
+            margin: 0 auto;
+        }
+        
+        .nav-list a:hover {
+            background-color: #2980b9;
+        }
+        
+        .nav-list a .icon {
+            width: 30px;
+            height: 30px;
+            margin-right: 20px;
+            display: inline-block;
+            font-size: 24px;
+        }
+        
+        .nav-list a .text {
+            display: none;
+        }
+        
+        .sidebar.expanded .nav-list a {
+            padding: 15px 25px;
+            width: 100%; /* Remove the width restriction */
+        }
+        
+        .sidebar.expanded .nav-list a .text {
+            display: inline;
+        }
+        
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Updated styles for clock and date overlay */
+        .slideshow-section {
+            position: relative;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        .date-time-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+        }
+
+        .calendar-display {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .clock-display {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .slides {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+
+        .slides > * {
+            flex: 0 0 100%;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;  /* This will cover the entire slide area */
+        }
+        
+        .weather-panel, .twitter-panel, .calendar-section {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 15px;
+            text-align: center;
+            color: white;
+        }
+
+        #calendar {
+            height: 100%;
+        }
+    /* Three image containers (use 25% for four, and 50% for two, etc) */
+    .column {
+        float: left;
+        width: 16.67%;
+        padding: 5px;
+    }
+
+    /* Clear floats after image containers */
+    .row::after {
+        content: "";
+        clear: both;
+        display: table;
+    }
+    /* Custom scrollbar styles */
+    .sidebar::-webkit-scrollbar {
+        width: 10px;
+        }
+
+    .sidebar::-webkit-scrollbar-track {
+        background-color: #34495e;
+        border-radius: 10px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+        background-color: #3cff00;
+        border-radius: 10px;
+        border: 2px solid #34495e;
+    }
+
+    /* Toggle button styles */
+    #toggle-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+        background-color: #1eff00;
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    #toggle-btn:hover {
+        background-color: #00f35d;
+    }
+
+
+        /* App Drawer Styles */
+        .app-drawer-toggle {
+            width: 60px;
+            height: 60px;
+            background-color: #f0f0f0;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .app-drawer-toggle:hover {
+            background-color: #e0e0e0;
+        }
+
+        .app-drawer {
+            position: fixed;
+            bottom: -300px; /* Start off-screen */
+            left: 0;
+            width: 100%;
+            height: 300px;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
+            transition: bottom 0.3s ease-in-out;
+            z-index: 999;
+            overflow-y: auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-content: flex-start;
+            padding: 20px;
+        }
+
+        .app-drawer.open {
+            bottom: 80px; /* Height of the app dock */
+        }
+
+        .drawer-app-icon {
+            width: 80px;
+            height: 80px;
+            margin: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .drawer-app-icon img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            margin-bottom: 5px;
+        }
+
+        .drawer-app-icon span {
+            font-size: 12px;
+            color: #333;
+        }
+
+        /* Ensure the app dock is above other elements but below the drawer */
+        .app-dock {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .app-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 10px;
+            transition: transform 0.2s ease-in-out;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .app-icon img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+
+        .app-icon:hover {
+            transform: scale(1.2);
+        }
+
+        #backgroundImageInput {
+            display: none;
+        }
+
+        .custom-file-upload {
+            border: 1px solid #ccc;
+            display: inline-block;
+            padding: 6px 12px;
+            cursor: pointer;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .custom-file-upload:hover {
+            background-color: #e9ecef;
+        }
+    </style>
+</head>
+<body>
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-bar-content">
+                <span onclick="toggleNotificationDrawer()">Verizon</span>
+            </div>
+            <div class="notification-icon" onclick="toggleNotificationDrawer()">
+                🔔
+            </div>
+        </div>
+            <!-- Notification Drawer -->
+    <div class="notification-drawer" id="notificationDrawer">
+        <div class="notification-header">
+            <span>Notifications</span>
+            <span class="close-drawer" onclick="toggleNotificationDrawer()">×</span>
+        </div>
+        <div class="notification-list" id="notificationList">
+            <!-- Notifications will be dynamically added here -->
+        </div>
+                        <!-- Spotify Player -->
+                        <div class="spotify-player">
+                            <h3>Now Playing</h3>
+                            <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/66N1S3Swalquk2BBqoWA7G?utm_source=generator&theme=0" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                        </div>
+            <!-- Add more notification items as needed -->
+        </div>
+    </div>
+    <div class="search-bar">
+        <form method="GET" action="http://www.google.com/search">
+            <input type="text" name="q" size="31" maxlength="255" placeholder="Search Google...">
+            <input type="hidden" name="hl" value="en">
+            <input type="submit" name="btnG" value="Google Search">
+        </form>
+        <div id="root">
+            <script src="/static/js/componentfile.js"></script>
+            
+        </div> 
+        
+    </div>
+    <div class="dashboard-container">
+        <button id="toggle-btn">☰</button>
+        <!-- Vertical Navigation -->
+        <nav class="sidebar">
+            <ul class="nav-list">
+                <li><a href="/templates/home.html"><span class="icon">🏠</span><span class="text">Home</span></a></li>
+                <li><a href="#settings"><span class="icon">⚙️</span><span class="text">Settings</span></a></li>
+                <li><a href="#profile"><span class="icon">👤</span><span class="text">Profile</span></a></li>
+                <li><a href="#notifications"><span class="icon">🔔</span><span class="text">Notifications</span></a></li>
+                <li><a href="#tasks"><span class="icon">📝</span><span class="text">Tasks</span></a></li> 
+                <li><a href="http://127.0.0.1:5000"><span class="icon">🌐</span><span class="text">Hub</span></a></li>
+                <li><a href="#reminders"><span class="icon">⏰</span><span class="text">Reminders</span></a></li>
+                <li><a href="#calendar"><span class="icon">📅</span><span class="text">Calendar</span></a></li>
+                <li><a href="#chatbot"><span class="icon">💬</span><span class="text">Chatbot</span></a></li>
+                <li><a href="/apptv.html"><span class="icon">🎥</span><span class="text">Videos</span></a></li>
+                <li><a href="#weather"><span class="icon">🌤️</span><span class="text">Weather</span></a></li>
+                <li><a href="#music"><span class="icon">🎵</span><span class="text">Music</span></a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Slideshow Section -->
+            <div class="slideshow-section">
+                <div class="date-time-overlay">
+                    <div class="calendar-display" id="date-display"></div>
+                    <div class="clock-display" id="clock-display"></div>
+                </div>
+                <div class="slides">
+                    <!-- Your image tags go here -->
+                    <img src="F:/JAIRVISMKVII/static/photos/0625222026.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/0625222027.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/0e4d553d8e48f24bf0dfc4cd59989e58.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/11b6735ca4472406a5af0c76a7526f75.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/1280x720.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/1b69339f-9d0b-4940-892c-d2cb9de5741cphoto.jpeg">
+                    <img src="F:/JAIRVISMKVII/static/photos/2022-03-09_09.58.40.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/2022-03-09_09.58.51.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/2022-03-09_10.00.37.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/2022-03-09_10.00.57.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/2022-03-09_12.37.36.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/2022-03-09_12.37.41.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/2022-03-09_12.37.55.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/2022-03-11_12.59.55.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/2022-03-11_13.00.37.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/2022-03-11_13.02.05.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/2022-03-11_13.03.19.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/2022-03-11_13.04.37.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/2022-03-11_13.04.48.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/2022-03-11_13.05.05.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/2022-03-11_13.06.35.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/2022-03-11_13.06.39.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/2022-03-11_13.06.51.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/2022-03-11_13.09.53.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/2022-08-08_09.27.01.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/28654f48682d052718e1473deccab2bf.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/334267646_1147765895888390_6606556905978705668_n.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/334320452_220539130467796_5266379868029428352_n.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/405ba71d408c4411b13d9d52a4d1d897.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/41e06fa98fb2d1491ddc68e6a7a87b2e.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/46ad551d4d97b2e3c6951f70a2b7ce85.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/4da65f5b30dcc70f610f365b8c7e3a0a.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/5f9f5c99f618385f09a65087464cfca9.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/7297da6464239caa5888651a6ed3e1f3.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/849c2cbebc20f43a8362b03b1f936a97.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/89d4e70427e1fb86f62623c0dc2e6bed.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/8a1a4e18-2dc9-4a8d-a0df-871b36a72630photo.jpeg">
+                    <img src="F:/JAIRVISMKVII/static/photos/90bab19040ed5bf5531253b0c00fc5e0.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/972b6d18136ba5f708bac0563ae6f514.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/9a56d164-9b75-4fdb-a53e-c7158d965699photo.jpeg">
+                    <img src="F:/JAIRVISMKVII/static/photos/b0d22a64b367f912227372855768b883.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/db2qdqt-334e5bce-16ba-4130-a5bf-957b3b50a4b1.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/dbsclka-dcd3bfe4-e9f8-432e-b466-5519783d22ab.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/ddkvha7-4ed11eed-efcc-4b00-98ec-e7c79749c6d9.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/de2a65b7a59ec1800ca19ec5f9af350f.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/DSC_0742.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/DSC_0863.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/DSC_1081.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/DSC_1175.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/DSC_1578.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/DSC_1993.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/DSC_3137-Edit copy.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/e1b539f61895525a76b0aedeaae13089.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/e2b0461ffa0b54e25c4d6d8f03a37b71.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/f00adc466c204571534ddeefce266680.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/fallout_4___piper__speed_painting__by_captainbombastic_d9g81fx.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/FB_IMG_1617281071003.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/FB_IMG_1617370605186.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/gabriel-lunven-anotherlinkbcfuckitnv2.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/jhakxsellstcg_1614103262659419.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/received_1183783012469611.jpeg">
+                    <img src="F:/JAIRVISMKVII/static/photos/received_1650101381902243.jpeg">
+                    <img src="F:/JAIRVISMKVII/static/photos/SkyrimSE 2024-08-17 10-52-35.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/SkyrimSE 2024-08-17 11-07-10-3.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/SkyrimSE 2024-08-17 11-08-33-4.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/SkyrimSE 2024-08-17 11-08-33.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/SkyrimSE 2024-08-17 12-20-11.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/SkyrimSE 2024-08-17 12-29-29.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/SkyrimSE 2024-08-18 15-04-44.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/SkyrimSE 2024-08-18 15-05-37.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/SkyrimSE 2024-08-18 15-09-00.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/SkyrimSE 2024-08-18 15-25-24.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/SkyrimSE 2024-08-18 15-32-35.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_12_24_2020_2_10_02_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_12_24_2020_2_10_02_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_12_24_2020_2_10_08_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_12_24_2020_2_10_14_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_12_24_2020_2_13_21_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_12_24_2020_2_13_21_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_12_24_2020_2_13_32_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_2_29_2020_5_44_09_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_10_2020_2_12_20_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_11_2020_2_50_13_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_12_2020_1_03_33_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_12_2020_5_48_48_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_12_2020_6_01_17_PM (1).jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_12_2020_6_01_17_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_13_2020_10_20_07_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_13_2020_10_30_40_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_13_2020_10_31_56_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_13_2020_10_31_56_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_13_2020_4_50_39_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_13_2020_4_50_39_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_13_2020_4_51_20_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_13_2020_5_05_30_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_13_2020_5_07_00_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_13_2020_5_07_54_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_13_2020_5_19_24_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_13_2020_5_19_24_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_13_2020_5_19_52_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_13_2020_5_23_31_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_13_2020_5_24_06_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_13_2020_5_24_40_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_15_2020_11_21_37_AM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_15_2020_11_21_37_AM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_17_2020_1_56_57_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_18_2020_5_36_28_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_18_2020_5_36_28_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_18_2020_5_37_29_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_19_2020_4_34_53_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_19_2020_4_35_12_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_19_2020_4_36_11_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_19_2020_4_38_14_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_19_2020_4_38_14_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_19_2020_4_40_02_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_19_2020_4_40_36_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_19_2020_4_40_36_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_19_2020_4_42_53_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_19_2020_4_43_41_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_19_2020_4_44_17_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_19_2020_4_44_17_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_19_2020_4_47_20_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_19_2020_4_47_20_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_19_2020_4_47_24_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_19_2020_4_47_34_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_19_2020_4_49_21_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_19_2020_4_52_08_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_19_2020_4_53_16_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_19_2020_4_53_16_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_19_2020_5_50_33_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_19_2020_5_50_33_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_19_2020_9_46_44_AM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_19_2020_9_46_44_AM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_1_2020_2_14_40_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_1_2020_2_35_09_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_20_2020_5_33_29_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_20_2020_5_33_29_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_20_2020_6_04_00_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_20_2020_9_02_07_AM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_20_2020_9_02_07_AM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_20_2020_9_02_24_AM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_20_2020_9_02_24_AM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_2_2020_5_30_01_PM (1).jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_2_2020_5_30_01_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_2_2020_5_30_01_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_4_2020_11_39_31_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_4_2020_11_39_31_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_4_2020_5_15_09_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_4_2020_5_15_09_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_4_2020_5_26_30_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_4_2020_5_26_30_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_4_2020_6_23_57_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_4_2020_6_23_57_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_4_2020_6_25_25_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_4_2020_6_25_25_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_3_7_2020_7_54_42_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_4_23_2020_9_56_47_AM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_5_24_2020_2_21_57_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_5_24_2020_3_17_39_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_5_31_2020_2_25_50_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_5_4_2020_9_24_45_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_5_6_2020_2_26_01_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_5_6_2020_2_27_33_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_5_6_2020_2_28_41_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_5_6_2020_2_30_19_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_5_7_2020_1_30_30_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_6_16_2020_4_06_51_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_6_16_2020_4_09_06_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_6_17_2020_4_14_22_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_6_17_2020_4_14_22_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_6_17_2020_4_35_29_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_6_18_2020_5_46_58_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_6_18_2020_5_46_58_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_6_21_2020_3_26_56_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_6_21_2020_3_26_56_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_6_21_2020_4_27_15_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_6_21_2020_4_27_15_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_6_30_2020_3_16_19_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_6_30_2020_3_16_35_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_6_30_2020_5_46_11_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_6_8_2020_11_47_34_AM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_7_17_2020_12_13_59_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_7_17_2020_12_15_00_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_7_17_2020_12_15_31_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_7_17_2020_12_15_31_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_7_22_2020_6_32_06_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_7_22_2020_6_32_25_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_7_22_2020_6_32_51_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_7_25_2020_4_36_02_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_7_25_2020_4_36_13_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_7_26_2020_4_08_08_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_7_26_2020_4_10_11_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_7_2_2020_8_30_08_AM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_7_4_2020_2_06_36_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_7_4_2020_2_07_17_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_9_14_2020_12_11_23_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_9_14_2020_12_11_42_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_9_14_2020_12_13_11_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_9_14_2020_12_15_14_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_9_14_2020_12_15_14_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_9_14_2020_12_18_56_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_9_14_2020_12_18_56_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_9_14_2020_12_20_25_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_9_14_2020_12_20_34_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_9_14_2020_12_21_28_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_9_14_2020_12_22_50_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_9_14_2020_12_22_50_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_9_15_2020_1_28_09_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_9_15_2020_1_29_20_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_9_15_2020_1_30_11_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_9_15_2020_1_31_19_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_9_15_2020_1_31_40_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_9_15_2020_1_32_38_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_9_15_2020_1_33_20_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_9_15_2020_1_41_08_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_9_15_2020_1_41_08_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_9_15_2020_1_44_59_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_9_16_2020_1_49_30_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_9_16_2020_1_49_30_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_9_16_2020_1_53_52_PM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_9_16_2020_1_59_01_PM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_9_4_2020_9_40_23_AM.jpg">
+                    <img src="F:/JAIRVISMKVII/static/photos/Skyrim_Special_Edition_9_4_2020_9_40_23_AM.png">
+                    <img src="F:/JAIRVISMKVII/static/photos/Smoke and Rust (1).jpg">
+                    <!-- ... other images ... -->
+                    <div class="weather-panel">
+                        <h3>Weather</h3>
+                        <p id="weather-info">Fetching weather...</p>
+                    </div>
+                    <div class="twitter-panel">
+                        <iframe src="https://x.com/home" width="100%" height="100%"></iframe>
+                    </div>
+                    <div class="calendar-section">
+                        <div id="calendar"></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <div class="app-drawer" id="appDrawer">
+                <!-- Add more app icons here -->
+                <div class="drawer-app-icon">
+                    <a href="#messages">
+                    <img src="/static/icons/app4-icon.png" alt="App 4" onerror="this.onerror=null; this.src='/static/icons/default-icon.png';">
+                    </a>
+                    <span>Messages</span>
+                </div>
+                <div class="drawer-app-icon">
+                    <img src="/static/icons/app5-icon.png" alt="App 5" onerror="this.onerror=null; this.src='/static/icons/default-icon.png';">
+                    <span>App 5</span>
+                </div>
+                <!-- Add more drawer-app-icon divs as needed -->
+            </div>
+        
+            <div class="app-dock">
+                <div class="app-drawer-toggle" id="appDrawerToggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                </div>
+                <div class="app-icon">
+                    <a href="https://gemini.google.com/app">
+                        <img src="F:/JAIRVISMKVII/static/icons/download.jpg" style="border-radius: 50%;" alt="Gemini" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'app-icon-text\'>Gemini</div>';">
+                    </a>
+                </div>
+                <div class="app-icon">
+                    <a href="https://www.messenger.com/e2ee/t/8230345287046416/">
+                    <img src="F:/JAIRVISMKVII/static/icons/Messenger.exe.png" alt="Facebook Messenger" style="border-radius: 50%;"  onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'app-icon-text\'>App 2</div>';">
+                    </a>
+                </div>
+                <div class="app-icon">
+                    <a href="https://discord.com/channels/@me">
+                    <img src="F:/JAIRVISMKVII/static/icons/Discord.exe.png" alt="App 3" style="border-radius: 50%;"onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'app-icon-text\'>App 3</div>';">
+                    </a>
+                </div>
+                <div class="app-icon recent-app">
+                    <img src="/static/icons/recent1-icon.png" alt="Recent App 1" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'app-icon-text\'>Recent 1</div>';">
+                </div>
+                <div class="app-icon recent-app">
+                    <img src="/static/icons/recent2-icon.png" alt="Recent App 2" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'app-icon-text\'>Recent 2</div>';">
+                </div>
+                <label for="backgroundImageInput" class="custom-file-upload">
+                    Change Background
+                </label>
+                <input type="file" id="backgroundImageInput" accept="image/png, image/jpeg, image/gif">
+            </div>
+    
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.11.3/main.min.js"></script>
+    <script>
+        function openApp(path) {
+          window.location.href = path;
+        }
+        </script>
+    <script>
+    // Slideshow functionality
+    // Slideshow functionality
+    const slides = document.querySelector('.slides');
+    const slideElements = document.querySelectorAll('.slides > *');
+    const totalSlides = slideElements.length;
+    let slideOrder = [];
+    let slideIndex = 0;
+
+    // Retrieve the last viewed slide index and slide order from localStorage, if available
+    if (localStorage.getItem('lastSlideIndex')) {
+        slideIndex = parseInt(localStorage.getItem('lastSlideIndex'));
+    }
+    if (localStorage.getItem('slideOrder')) {
+        slideOrder = JSON.parse(localStorage.getItem('slideOrder'));
+    } else {
+        initializeSlideOrder();
+    }
+
+    function initializeSlideOrder() {
+        // Create a sequential array of slide indices
+        slideOrder = Array.from(Array(totalSlides).keys());
+        shuffle(slideOrder); // Shuffle the slide order
+    }
+
+    // Shuffle array using Fisher-Yates algorithm
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    function showSlide(index) {
+        slides.style.transform = `translateX(-${index * 100}%)`;
+    }
+
+    function nextSlide() {
+        slideIndex = (slideIndex + 1) % totalSlides;
+        if (slideIndex === 0) {
+            shuffle(slideOrder); // Reshuffle when all slides have been shown
+        }
+        showSlide(slideOrder[slideIndex]);
+
+        // Store the current slide index and order in localStorage
+        localStorage.setItem('lastSlideIndex', slideIndex);
+        localStorage.setItem('slideOrder', JSON.stringify(slideOrder));
+    }
+
+    // Display the last viewed slide when the page loads
+    showSlide(slideOrder[slideIndex]);
+
+    // Automatically move to the next slide every 30 seconds
+    setInterval(nextSlide, 30000); // Change slide every 30 seconds
+        // Weather functionality
+        async function fetchWeather() {
+            const apiKey = '03c0e16b1429800ac660ddde54706c28'; // Replace with your API key
+            const city = 'Saluda,SC,US';  // Replace with your preferred city
+            const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=imperial`);
+            const data = await response.json();
+            const weatherInfo = `${data.weather[0].description}, ${data.main.temp}°F`;
+            document.getElementById('weather-info').textContent = weatherInfo;
+        }
+
+        fetchWeather();
+
+        // Calendar functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                events: [
+                    { title: 'Event 1', date: '2024-09-20' },
+                    { title: 'Event 2', date: '2024-09-25' }
+                ]
+            });
+
+            calendar.render();
+        });
+        
+        // Updated Date and Clock functionality with AM/PM
+        function updateDateAndTime() {
+            const now = new Date();
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const dateString = now.toLocaleDateString(undefined, dateOptions);
+            document.getElementById('date-display').textContent = dateString;
+            
+            updateClock();
+        }
+
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            hours = hours.toString().padStart(2, '0');
+            
+            const clockStr = `${hours}:${minutes}:${seconds} ${ampm}`;
+            document.getElementById('clock-display').textContent = clockStr;
+        }
+
+        // Initial update
+        updateDateAndTime();
+
+        // Update date and time every second
+        setInterval(updateDateAndTime, 1000);
+        // Updated Sidebar toggle functionality
+        const toggleBtn = document.getElementById('toggle-btn');
+        const sidebar = document.querySelector('.sidebar');
+
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('expanded');
+            toggleBtn.textContent = sidebar.classList.contains('expanded') ? '×' : '☰';
+        });
+        const backgroundImageInput = document.getElementById('backgroundImageInput');
+
+        backgroundImageInput.addEventListener('change', (event) => {
+            const file = event.target.files[0]; 
+
+
+                if (file) {
+                    const reader = new FileReader();
+
+                    reader.onload = (event) => {
+                        const 
+        body = document.body;
+            body.style.backgroundImage = `url(${event.target.result})`;
+            body.style.backgroundSize = 'cover';
+            body.style.backgroundPosition = 'center';
+            };
+
+            reader.readAsDataURL(file);
+        }
+    });
+        // App Drawer Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const appDrawerToggle = document.getElementById('appDrawerToggle');
+            const appDrawer = document.getElementById('appDrawer');
+
+            appDrawerToggle.addEventListener('click', function() {
+                appDrawer.classList.toggle('open');
+            });
+
+            // Close drawer when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!appDrawer.contains(event.target) && !appDrawerToggle.contains(event.target)) {
+                    appDrawer.classList.remove('open');
+                }
+            });
+        });
+        let notificationCount = 0;
+        const notificationList = document.getElementById('notificationList');
+        const notificationBadge = document.getElementById('notificationBadge');
+
+        // Request notification permission
+        if ("Notification" in window) {
+            Notification.requestPermission().then(function (permission) {
+                if (permission === "granted") {
+                    console.log("Notification permission granted.");
+                }
+            });
+        }
+
+        // Function to add a notification to the drawer
+        function addNotification(title, body, source) {
+            const notificationItem = document.createElement('div');
+            notificationItem.className = 'notification-item';
+            notificationItem.innerHTML = `
+                <div class="notification-content">
+                    <h3>${title}</h3>
+                    <p>${body}</p>
+                </div>
+                <span class="notification-close" onclick="removeNotification(this)">×</span>
+            `;
+            notificationList.prepend(notificationItem);
+            notificationCount++;
+            updateNotificationBadge();
+            // Save notification to local storage
+            const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+            notifications.push({ title, body, source, timestamp: Date.now() });
+            localStorage.setItem('notifications', JSON.stringify(notifications));
+        }
+
+        // Function to remove a notification
+        function removeNotification(closeButton) {
+            const notificationItem = closeButton.parentElement;
+            const index = Array.from(notificationList.children).indexOf(notificationItem);
+            notificationItem.remove();
+            const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+            notifications.splice(index, 1);
+            localStorage.setItem('notifications', JSON.stringify(notifications));
+            closeButton.parentElement.remove();
+            notificationCount--;
+            updateNotificationBadge();
+        }
+        function loadNotifications() {
+            const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+            notifications.forEach(notification => {
+                addNotificationToDrawer(notification.title, notification.body, notification.source);
+            });
+            updateNotificationBadge();
+        }
+        // Function to update the notification badge
+        function updateNotificationBadge() {
+            notificationBadge.textContent = notificationCount;
+            notificationBadge.style.display = notificationCount > 0 ? 'inline' : 'none';
+        }
+        // Listen for messages from the Chrome extension
+        if (typeof chrome !== 'undefined' && chrome.runtime) {
+            chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+                if (message.type === 'notification') {
+                    // Add the intercepted notification to the webpage drawer
+                    addNotification(message.title, message.body);
+                }
+            });
+        } 
+        // Notification Drawer Functionality
+        function toggleNotificationDrawer() {
+            const drawer = document.getElementById('notificationDrawer');
+            drawer.classList.toggle('open');
+        }
+// Pushbullet integration using WebSocket
+let lastFetchedPushTime = 0;
+
+function startPushbulletWebSocket() {
+    const accessToken = 'o.YR5tFQ9hjRfVV91s9RsYY1qXKZqDcOo6'; // Replace with your actual Pushbullet API token
+
+    const socket = new WebSocket(`wss://stream.pushbullet.com/websocket/${accessToken}`);
+
+    socket.onopen = () => {
+        console.log('Connected to Pushbullet WebSocket.');
+    };
+
+    socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+
+        // Check if the message is a push event
+        if (data.type === 'tickle' && data.subtype === 'push') {
+            fetchNewPushes(); // Fetch new pushes when a push event occurs
+        }
+    };
+
+    socket.onerror = (error) => {
+        console.error('Pushbullet WebSocket error:', error);
+    };
+
+    socket.onclose = () => {
+        console.log('Pushbullet WebSocket connection closed. Reconnecting...');
+        // Try to reconnect after 5 seconds if the connection closes
+        setTimeout(startPushbulletWebSocket, 5000);
+    };
+}
+
+// Function to fetch new Pushbullet pushes after receiving a WebSocket event
+async function fetchNewPushes() {
+    const accessToken = 'o.YR5tFQ9hjRfVV91s9RsYY1qXKZqDcOo6'; // Replace with your actual Pushbullet API token
+    try {
+        const response = await fetch(`https://api.pushbullet.com/v2/pushes?limit=10&modified_after=${lastFetchedPushTime}`, {
+            method: 'GET',
+            headers: {
+                'Access-Token': accessToken
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            const pushes = data.pushes;
+
+            // Update the last fetched time
+            if (pushes.length > 0) {
+                lastFetchedPushTime = Math.max(...pushes.map(push => push.modified));
+            }
+
+            // Use all pushes without filtering
+            const allPushes = pushes;
+
+            // Display the notifications in your custom drawer
+            allPushes.forEach(push => {
+                const title = push.title || 'Pushbullet Notification';
+                const body = push.body || 'You have a new notification';
+                addNotification(title, body, 'Pushbullet');
+            });
+
+            if (filteredPushes.length > 0) {
+                console.log(`Fetched ${filteredPushes.length} new notifications`);
+            }
+        } else if (response.status === 401) {
+            console.error('Pushbullet API authentication failed. Please check your access token.');
+            addNotification('Pushbullet Error', 'Failed to authenticate with Pushbullet. Please check your access token.', 'System');
+        } else {
+            console.error('Failed to fetch Pushbullet notifications:', response.statusText);
+            addNotification('Pushbullet Error', `Failed to fetch notifications: ${response.statusText}`, 'System');
+        }
+    } catch (error) {
+        console.error('Error fetching Pushbullet notifications:', error);
+        addNotification('Pushbullet Error', `Error fetching notifications: ${error.message}`, 'System');
+    }
+}
+
+// Start WebSocket connection when the page loads
+window.addEventListener('load', startPushbulletWebSocket);
+
+// Test function for Pushbullet integration (can be triggered manually for testing)
+function testPushbullet() {
+    fetchNewPushes();
+}
+
+
+
+    </script>
+    <script>
+    import * as React from 'react';
+    import { Button, TextField } from '@mui/material';
+
+    function MyComponent() {
+        const [selectedFile, setSelectedFile] = React.useState(null);
+
+        const handleFileChange = (event) => {
+            setSelectedFile(event.target.files[0]);
+        };
+
+        return (
+        <div>
+        <TextField
+            type="file"
+            variant="outlined"
+            label="Select Background Image"
+            onChange={handleFileChange}
+            inputProps={{ accept: 'image/png, image/jpeg, image/gif' }}
+        />
+        {selectedFile && (
+            <Button variant="contained" color="primary" onClick={() => applyBackgroundImage(selectedFile)}>
+            Apply Background
+            </Button>
+        )}
+        </div>
+    );
+    }
+    </script>
+</body>
+</html>

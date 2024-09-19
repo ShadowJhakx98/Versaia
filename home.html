@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart UI Dashboard</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.11.3/main.min.css">
+</head>
+<body>
+    
+    <div class="container">
+        <!-- Slideshow Section -->
+        <div class="slideshow">
+            <div class="slides">
+                <img src="\static\photos\1b69339f-9d0b-4940-892c-d2cb9de5741cphoto.jpeg" width="800px" height="400px" alt="Slide 1">
+                <img src="\static\photos\9a56d164-9b75-4fdb-a53e-c7158d965699photo.jpeg" width="800px" height="400px" alt="Slide 2">
+            </div>
+            <div class="weather-panel">
+                <h3>Weather</h3>
+                <p id="weather-info">Fetching weather...</p>
+            </div>
+        </div>
+
+        <!-- 3D Slideshow Section -->
+        <section id="slideshow">
+          <div class="slideshow-container">
+            <div class="content-carrousel">
+              <figure class="shadow"><img src="https://images.pexels.com/photos/758733/pexels-photo-758733.jpeg?w=940&h=650&auto=compress&cs=tinysrgb"/></figure>
+              <figure class="shadow"><img src="https://images.pexels.com/photos/21261/pexels-photo.jpg?w=940&h=650&auto=compress&cs=tinysrgb"/></figure>
+              <figure class="shadow"><img src="https://images.pexels.com/photos/567973/pexels-photo-567973.jpeg?w=940&h=650&auto=compress&cs=tinysrgb"/></figure>
+              <figure class="shadow"><img src="https://images.pexels.com/photos/776653/pexels-photo-776653.jpeg?w=940&h=650&auto=compress&cs=tinysrgb"/></figure>
+              <figure class="shadow"><img src="https://images.pexels.com/photos/54630/japanese-cherry-trees-flowers-spring-japanese-flowering-cherry-54630.jpeg?w=940&h=650&auto=compress&cs=tinysrgb"/></figure>
+              <figure class="shadow"><img src="https://images.pexels.com/photos/131046/pexels-photo-131046.jpeg?w=940&h=650&auto=compress&cs=tinysrgb"/></figure>
+              <figure class="shadow"><img src="https://images.pexels.com/photos/302515/pexels-photo-302515.jpeg?w=940&h=650&auto=compress&cs=tinysrgb"/></figure>
+              <figure class="shadow"><img src="https://images.pexels.com/photos/301682/pexels-photo-301682.jpeg?w=940&h=650&auto=compress&cs=tinysrgb"/></figure>
+              <figure class="shadow"><img src="https://images.pexels.com/photos/933054/pexels-photo-933054.jpeg?w=940&h=650&auto=compress&cs=tinysrgb"/></figure>
+            </div>
+          </div>
+        </section>
+
+        <!-- Reminders Section -->
+        <div class="reminders">
+            <h3>Reminders</h3>
+            <ul id="reminder-list"></ul>
+            <input type="text" id="reminder-input" placeholder="Add a reminder">
+            <button id="add-reminder">Add</button>
+        </div>
+
+        <!-- Calendar Section -->
+        <div class="calendar">
+            <h3>Calendar</h3>
+            <div id="calendar"></div>
+        </div>
+
+        <!-- Chatbot Section -->
+        <div class="chatbot">
+            <h3>Versaia AI Chatbot</h3>
+            <div id="chat-history"></div>
+            <input type="text" id="user-input" placeholder="Type your message...">
+            <button id="send-button">Send</button>
+            <button id="record-button">Record Speech wit.ai</button>
+            <button id="record-button-2">Record Speech AI</button>
+            <img id="image-display" style="display: none;">
+            <audio id="audio-player" controls style="display: none;"></audio>
+        </div>
+    </div>
+
+    <!-- APPTV PANEL INTEGRATION -->
+    <iframe src="apptv.html" style="position: fixed; width: 100%; height: 100vh; border: none;"></iframe>
+
+    <script src="/static/js/script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.11.3/main.min.js"></script>
+</body>
+</html>
