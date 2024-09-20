@@ -1,0 +1,110 @@
+#boot-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+  color: #0f0;
+  font-family: 'Courier New', monospace;
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 1;
+  transition: opacity 1s ease-out;
+}
+
+.boot-content {
+  text-align: center;
+}
+
+.logo-container {
+  margin-bottom: 20px;
+}
+
+.boot-logo {
+  max-width: 200px;
+  margin-bottom: 10px;
+}
+
+.loading-bar {
+  width: 300px;
+  height: 20px;
+  background-color: #333;
+  margin: 20px auto;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.loading-progress {
+  width: 0;
+  height: 100%;
+  background-color: #0f0;
+  transition: width 2s linear;
+}
+
+#boot-message {
+  font-size: 18px;
+  margin-top: 20px;
+}
+
+#bios-prompt {
+  font-size: 14px;
+  margin-top: 10px;
+  color: #888;
+}
+
+body {
+  visibility: hidden;
+  background-color: #222;
+  color: #fff;
+  font-family: Arial, sans-serif;
+}
+
+body.loaded {
+  visibility: visible;
+}
+
+#bios-settings, #login-screen {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #000;
+  border: 2px solid #0f0;
+  padding: 20px;
+  z-index: 10000;
+}
+
+.settings-group {
+  margin-bottom: 15px;
+}
+
+label {
+  display: inline-block;
+  width: 150px;
+}
+
+select, input[type="range"] {
+  width: 200px;
+}
+
+button {
+  background-color: #0f0;
+  color: #000;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0c0;
+}
+
+#login-form input {
+  display: block;
+  margin-bottom: 10px;
+  padding: 5px;
+  width: 200px;
+}
