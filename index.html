@@ -64,11 +64,15 @@
 }
 
 body {
+  visibility: hidden;
   background-color: #222;
   color: #fff;
   font-family: Arial, sans-serif;
 }
 
+body.loaded {
+  visibility: visible;
+}
 
 #bios-settings, #login-screen {
   position: fixed;
