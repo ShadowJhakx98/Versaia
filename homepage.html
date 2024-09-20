@@ -1013,7 +1013,6 @@ const pushbullet = {
         setInterval(() => this.fetchNewPushes(), 30000); // Poll every 30 seconds
     }
 };
-// Voice Recognition
 const voiceRecognition = {
     recognition: null,
     audioContext: null,
@@ -1032,48 +1031,42 @@ const voiceRecognition = {
 
         this.initializeAudio();
     },
-function initializeAudio() {
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    
-    function loadSound(url) {
-        return fetch(url)
-            .then(response => response.arrayBuffer())
-            .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer));
-    }
 
-    return Promise.all([
-        loadSound("https://shadowjhakx98.github.io/Versaia/sounds/start-sound.mp3"),
-        loadSound("https://shadowjhakx98.github.io/Versaia/sounds/recognition-sound.mp3"),
-        loadSound("https://shadowjhakx98.github.io/Versaia/sounds/stop-sound.mp3")
-    ]).then(([start, recognition, stop]) => {
-        startSound = start;
-        recognitionSound = recognition;
-        stopSound = stop;
-    });
-}
+    async initializeAudio() {
+        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        const loadSound = (url) => {
+            return fetch(url)
+                .then(response => response.arrayBuffer())
+                .then(arrayBuffer => this.audioContext.decodeAudioData(arrayBuffer));
+        };
 
-function playSound(audioBuffer) {
-    if (audioContext.state === 'suspended') {
-        audioContext.resume();
-    }
-    const source = audioContext.createBufferSource();
-    source.buffer = audioBuffer;
-    source.connect(audioContext.destination);
-    source.start(0);
-}
-
-voiceIcon.addEventListener('click', async () => {
-    if (!audioContext) {
         try {
-            await initializeAudio();
+            const [start, recognition, stop] = await Promise.all([
+                loadSound("https://shadowjhakx98.github.io/Versaia/sounds/start-sound.mp3"),
+                loadSound("https://shadowjhakx98.github.io/Versaia/sounds/recognition-sound.mp3"),
+                loadSound("https://shadowjhakx98.github.io/Versaia/sounds/stop-sound.mp3")
+            ]);
+
+            this.sounds = { start, recognition, stop };
         } catch (error) {
             console.error('Failed to initialize audio:', error);
             alert('Failed to initialize audio. Voice recognition may not work properly.');
         }
-    }
+    },
 
-    if (audioContext) {
-        playSound(startSound);
+    playSound(soundName) {
+        if (this.audioContext && this.sounds[soundName]) {
+            if (this.audioContext.state === 'suspended') {
+                this.audioContext.resume();
+            }
+            const source = this.audioContext.createBufferSource();
+            source.buffer = this.sounds[soundName];
+            source.connect(this.audioContext.destination);
+            source.start(0);
+        }
+    },
+
     start() {
         if (this.audioContext && this.audioContext.state === 'suspended') {
             this.audioContext.resume();
@@ -1081,7 +1074,6 @@ voiceIcon.addEventListener('click', async () => {
         this.playSound('start');
         this.recognition.start();
     },
-
     async handleResult(event) {
         const transcript = event.results[0][0].transcript;
         console.log('User said:', transcript);
