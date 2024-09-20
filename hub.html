@@ -689,6 +689,7 @@
                 <div class="app-icon" id="voice-icon">
                     <img src="https://shadowjhakx98.github.io/Versaia/icons/Versaia.webp" alt="Versaia AI" style="border-radius: 50%">
                 </div>
+                
                 <script>
                 // Voice Recognition
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -762,7 +763,6 @@ recognition.addEventListener('result', async (event) => {
         });
         const data = await response.json();
         console.log('AI response:', data.response);
-        alert(`AI says: ${data.response}`);
 
         const synth = window.speechSynthesis;
         const utterance = new SpeechSynthesisUtterance(data.response);
