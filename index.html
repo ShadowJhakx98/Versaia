@@ -1187,13 +1187,19 @@ async function getSuggestions(task) {
 
     const voiceIcon = document.getElementById('voice-icon');
 
+    // When the user clicks the microphone icon (activate)
     voiceIcon.addEventListener('click', function() {
+        startSound.play();  // Play start sound
         recognition.start();  // Start listening
     });
 
+    // When speech is recognized
     recognition.addEventListener('result', function(event) {
         const transcript = event.results[0][0].transcript;
         console.log('User said:', transcript);
+
+        // Play recognition sound
+        recognitionSound.play();
 
         // Send the transcript to the Flask backend for AI processing
         fetch('/process_speech', {
@@ -1210,9 +1216,10 @@ async function getSuggestions(task) {
         });
     });
 
+    // When speech recognition ends or is deactivated
     recognition.addEventListener('end', function() {
+        stopSound.play();  // Play stop sound
         console.log('Speech recognition ended.');
-    
     });
     const synth = window.speechSynthesis;
     const utterance = new SpeechSynthesisUtterance(data.response);
