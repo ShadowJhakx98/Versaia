@@ -852,23 +852,30 @@
     
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.11.3/main.min.js"></script>
-    <script>
-        function openApp(path) {
-          window.location.href = path;
-        }
-        </script>
-    <script>
-// Utility Functions
-function openApp(path) {
-    window.location.href = path;
-}
 
-function shuffle(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
+    <script>
+const API_BASE_URL = 'https://shadowjhakx98.pythonanywhere.com'
+// Utility Functions
+const utilityFunctions = {
+    openApp(path) {
+        window.location.href = path;
+    },
+
+    shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    },
+
+    async fetchJSON(url, options = {}) {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
     }
-}
+};
 
 // Slideshow Functionality
 const slides = document.querySelector('.slides');
@@ -897,18 +904,17 @@ function nextSlide() {
 }
 
 // Weather Functionality
-async function fetchWeather() {
-    const apiKey = '03c0e16b1429800ac660ddde54706c28';
-    const city = 'Saluda,SC,US';
-    try {
-        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=imperial`);
-        const data = await response.json();
-        const weatherInfo = `${data.weather[0].description}, ${data.main.temp}°F`;
-        document.getElementById('weather-info').textContent = weatherInfo;
-    } catch (error) {
-        console.error('Error fetching weather:', error);
+const weather = {
+    async fetchWeather() {
+        try {
+            const data = await utilityFunctions.fetchJSON(`${API_BASE_URL}/weather`);
+            const weatherInfo = `${data.description}, ${data.temperature}°F`;
+            document.getElementById('weather-info').textContent = weatherInfo;
+        } catch (error) {
+            console.error('Error fetching weather:', error);
+        }
     }
-}
+};
 
 // Date and Clock Functionality
 function updateDateAndTime() {
@@ -983,67 +989,50 @@ function toggleNotificationDrawer() {
 }
 
 // Pushbullet Integration
-let lastFetchedPushTime = 0;
-const PUSHBULLET_ACCESS_TOKEN = 'o.YR5tFQ9hjRfVV91s9RsYY1qXKZqDcOo6';
+const pushbullet = {
+    lastFetchedPushTime: 0,
 
-function startPushbulletWebSocket() {
-    const socket = new WebSocket(`wss://stream.pushbullet.com/websocket/${PUSHBULLET_ACCESS_TOKEN}`);
-
-    socket.onopen = () => console.log('Connected to Pushbullet WebSocket.');
-    socket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.type === 'tickle' && data.subtype === 'push') {
-            fetchNewPushes();
-        }
-    };
-    socket.onerror = (error) => console.error('Pushbullet WebSocket error:', error);
-    socket.onclose = () => {
-        console.log('Pushbullet WebSocket connection closed. Reconnecting...');
-        setTimeout(startPushbulletWebSocket, 5000);
-    };
-}
-
-async function fetchNewPushes() {
-    try {
-        const response = await fetch(`https://api.pushbullet.com/v2/pushes?limit=10&modified_after=${lastFetchedPushTime}`, {
-            method: 'GET',
-            headers: { 'Access-Token': PUSHBULLET_ACCESS_TOKEN }
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            const pushes = data.pushes;
+    async fetchNewPushes() {
+        try {
+            const pushes = await utilityFunctions.fetchJSON(`${API_BASE_URL}/pushbullet`);
             if (pushes.length > 0) {
-                lastFetchedPushTime = Math.max(...pushes.map(push => push.modified));
+                this.lastFetchedPushTime = Math.max(...pushes.map(push => push.modified));
                 pushes.forEach(push => {
                     const title = push.title || 'Pushbullet Notification';
                     const body = push.body || 'You have a new notification';
-                    addNotification(title, body, 'Pushbullet');
+                    notifications.addNotification(title, body, 'Pushbullet');
                 });
                 console.log(`Fetched ${pushes.length} new notifications`);
             }
-        } else if (response.status === 401) {
-            console.error('Pushbullet API authentication failed. Please check your access token.');
-            addNotification('Pushbullet Error', 'Failed to authenticate with Pushbullet. Please check your access token.', 'System');
-        } else {
-            throw new Error(response.statusText);
+        } catch (error) {
+            console.error('Error fetching Pushbullet notifications:', error);
+            notifications.addNotification('Pushbullet Error', `Error fetching notifications: ${error.message}`, 'System');
         }
-    } catch (error) {
-        console.error('Error fetching Pushbullet notifications:', error);
-        addNotification('Pushbullet Error', `Error fetching notifications: ${error.message}`, 'System');
+    },
+
+    startPolling() {
+        setInterval(() => this.fetchNewPushes(), 30000); // Poll every 30 seconds
     }
-}
-
+};
 // Voice Recognition
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-const recognition = new SpeechRecognition();
-recognition.interimResults = false;
-recognition.lang = 'en-US';
+const voiceRecognition = {
+    recognition: null,
+    audioContext: null,
+    sounds: {},
 
-const voiceIcon = document.getElementById('voice-icon');
-let audioContext;
-let startSound, recognitionSound, stopSound;
+    init() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        this.recognition = new SpeechRecognition();
+        this.recognition.interimResults = false;
+        this.recognition.lang = 'en-US';
 
+        this.recognition.addEventListener('result', this.handleResult.bind(this));
+        this.recognition.addEventListener('end', this.handleEnd.bind(this));
+
+        document.getElementById('voice-icon').addEventListener('click', this.start.bind(this));
+
+        this.initializeAudio();
+    },
 function initializeAudio() {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
     
@@ -1086,61 +1075,85 @@ voiceIcon.addEventListener('click', async () => {
 
     if (audioContext) {
         playSound(startSound);
-        recognition.start();
-    }
-});
+    start() {
+        if (this.audioContext && this.audioContext.state === 'suspended') {
+            this.audioContext.resume();
+        }
+        this.playSound('start');
+        this.recognition.start();
+    },
 
-recognition.addEventListener('result', async (event) => {
-    const transcript = event.results[0][0].transcript;
-    console.log('User said:', transcript);
-    
-    if (audioContext) {
-        playSound(recognitionSound);
-    }
+    async handleResult(event) {
+        const transcript = event.results[0][0].transcript;
+        console.log('User said:', transcript);
+        
+        this.playSound('recognition');
 
-    try {
-        const response = await fetch('/process_speech', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ speech: transcript })
+        try {
+            const response = await utilityFunctions.fetchJSON(`${API_BASE_URL}/process_speech`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ speech: transcript }),
+            });
+
+            console.log('AI response:', response.response);
+            alert(`AI says: ${response.response}`);
+
+            // Text-to-speech
+            const synth = window.speechSynthesis;
+            const utterance = new SpeechSynthesisUtterance(response.response);
+            synth.speak(utterance);
+        } catch (error) {
+            console.error('Error processing speech:', error);
+            alert('Error processing speech. Please try again.');
+        }
+    },
+
+    handleEnd() {
+        this.playSound('stop');
+        console.log('Speech recognition ended.');
+    }
+};
+// Task Suggestions
+const taskSuggestions = {
+    async getSuggestions(task) {
+        try {
+            const response = await utilityFunctions.fetchJSON(`${API_BASE_URL}/get_suggestions`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ task }),
+            });
+            return response.suggestions;
+        } catch (error) {
+            console.error('Error getting task suggestions:', error);
+            return ['Error fetching suggestions. Please try again.'];
+        }
+    },
+
+    async displaySuggestions(task) {
+        const suggestions = await this.getSuggestions(task);
+        const suggestionsContainer = document.getElementById('suggestions-container');
+        suggestionsContainer.innerHTML = '';
+        suggestions.forEach((suggestion, index) => {
+            const suggestionElement = document.createElement('div');
+            suggestionElement.textContent = `Suggestion ${index + 1}: ${suggestion}`;
+            suggestionsContainer.appendChild(suggestionElement);
         });
-        const data = await response.json();
-        console.log('AI response:', data.response);
-        alert(`AI says: ${data.response}`);
-
-        const synth = window.speechSynthesis;
-        const utterance = new SpeechSynthesisUtterance(data.response);
-        synth.speak(utterance);
-    } catch (error) {
-        console.error('Error processing speech:', error);
     }
-});
+};
 
-recognition.addEventListener('end', () => {
-    if (audioContext) {
-        playSound(stopSound);
-    }
-    console.log('Speech recognition ended.');
-});
-
-// Event Listeners and Initialization
+// Main initialization
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize slideshow
-    if (localStorage.getItem('lastSlideIndex')) {
-        slideIndex = parseInt(localStorage.getItem('lastSlideIndex'));
-    }
-    if (localStorage.getItem('slideOrder')) {
-        slideOrder = JSON.parse(localStorage.getItem('slideOrder'));
-    } else {
-        initializeSlideOrder();
-    }
-    showSlide(slideOrder[slideIndex]);
-    setInterval(nextSlide, 30000);
-
-    // Initialize weather, date, and time
-    fetchWeather();
-    updateDateAndTime();
-    setInterval(updateDateAndTime, 1000);
+    slideshow.init();
+    weather.fetchWeather();
+    dateAndClock.init();
+    notifications.init();
+    pushbullet.startPolling();
+    voiceRecognition.init();
 
     // Initialize sidebar toggle
     const toggleBtn = document.getElementById('toggle-btn');
@@ -1175,21 +1188,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Initialize notifications
-    loadNotifications();
+    // Initialize notifications permission
     if ("Notification" in window) {
         Notification.requestPermission();
     }
 
-    // Initialize Pushbullet
-    startPushbulletWebSocket();
-});
-    // Initialize voice recognition
-    voiceIcon.addEventListener('click', () => {
-        if (audioContext && audioContext.state === 'suspended') {
-            audioContext.resume();
-        }
+    // Initialize task suggestions
+    const taskInput = document.getElementById('task-input');
+    const getSuggestionsBtn = document.getElementById('get-suggestions-btn');
+    getSuggestionsBtn.addEventListener('click', () => {
+        taskSuggestions.displaySuggestions(taskInput.value);
     });
+});
 
 
     </script>
