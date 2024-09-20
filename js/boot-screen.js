@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function showLogo(logoElement, soundElement, duration) {
         return new Promise((resolve) => {
             logoElement.style.display = 'block';
+            logoElement.style.opacity = '1';      // Ensure it's fully opaque
             soundElement.play().catch(e => console.error("Audio play failed:", e));
             setTimeout(() => {
                 logoElement.style.display = 'none';
