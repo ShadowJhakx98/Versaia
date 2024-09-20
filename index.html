@@ -218,14 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let inBiosSettings = false;
    let userInteracted = false;
 
-    // Wait for user interaction
-    document.addEventListener('click', () => {
-        if (!userInteracted) {
-            userInteracted = true;
-            console.log("User interacted, allowing sounds to play.");
-            runBootSequence();
-        }
-    });
+
 
     function showLogo(logoElement, soundElement, duration) {
         return new Promise((resolve) => {
@@ -260,7 +253,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // Start main boot sequence
         bootSequence.style.display = 'block';
         startupSound.play().catch(e => console.error("Startup sound play failed:", e));
-        
+        // Wait for user interaction
+        document.addEventListener('click', () => {
+            if (!userInteracted) {
+                userInteracted = true;
+                console.log("User interacted, allowing sounds to play.");
+                runBootSequence();
+            }
+    });
         function displayNextMessage() {
             if (messageIndex < messages.length) {
                 bootMessage.textContent = messages[messageIndex];
