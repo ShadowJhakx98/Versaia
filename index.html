@@ -1,174 +1,245 @@
-<html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VERSAIA OS</title>
-<style>
-#boot-screen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: #000;
-  color: #0f0;
-  font-family: 'Courier New', monospace;
-  z-index: 9999;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  opacity: 1;
-  transition: opacity 1s ease-out;
-}
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
 
-.boot-content {
-  text-align: center;
-}
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Roboto', sans-serif;
+            background-color: #000;
+            color: #fff;
+            overflow: hidden;
+        }
 
-.logo-container {
-  margin-bottom: 20px;
-}
+        #boot-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 1;
+            transition: opacity 1s ease-out;
+        }
 
-.boot-logo {
-  width: 200px;
-  height: 200px;
-  margin-bottom: 10px;
-}
+        .boot-content {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
 
+        .logo-container {
+            margin-bottom: 30px;
+        }
 
-.loading-bar {
-  width: 300px;
-  height: 20px;
-  background-color: #333;
-  margin: 20px auto;
-  border-radius: 10px;
-  overflow: hidden;
-}
+        .boot-logo {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+            transition: all 0.3s ease;
+        }
 
-.loading-progress {
-  width: 0;
-  height: 100%;
-  background-color: #0f0;
-  transition: width 2s linear;
-}
+        .boot-logo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+        }
 
-#boot-message {
-  font-size: 18px;
-  margin-top: 20px;
-}
+        h1 {
+            font-size: 36px;
+            font-weight: 300;
+            margin-top: 20px;
+            letter-spacing: 2px;
+            color: #0f0;
+        }
 
-#bios-prompt {
-  font-size: 14px;
-  margin-top: 10px;
-  color: #888;
-}
+        .loading-container {
+            position: relative;
+            width: 300px;
+            margin: 30px auto;
+        }
 
-body {
-  background-color: #222;
-  color: #fff;
-  font-family: Arial, sans-serif;
-}
+        .aurora {
+            position: absolute;
+            top: -100px;
+            left: -50px;
+            width: 400px;
+            height: 200px;
+            background: linear-gradient(60deg, rgba(0,255,0,0) 0%, rgba(0,255,0,0.1) 50%, rgba(0,255,0,0) 100%);
+            filter: blur(30px);
+            opacity: 0.7;
+            animation: aurora 8s infinite, moveAurora 20s infinite alternate;
+        }
 
+        @keyframes aurora {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.2); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
 
-#bios-settings, #login-screen {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: #000;
-  border: 2px solid #0f0;
-  padding: 20px;
-  z-index: 10000;
-}
+        @keyframes moveAurora {
+            0% { transform: translateX(-50px) translateY(-20px); }
+            100% { transform: translateX(50px) translateY(20px); }
+        }
 
-.settings-group {
-  margin-bottom: 15px;
-}
+        .loading-bar {
+            width: 300px;
+            height: 4px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+            z-index: 2;
+        }
 
-label {
-  display: inline-block;
-  width: 150px;
-}
+        .loading-progress {
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, #0f0, #00ff9d);
+            transition: width 2s linear;
+        }
 
-select, input[type="range"] {
-  width: 200px;
-}
+        #boot-message {
+            font-size: 16px;
+            margin-top: 20px;
+            color: #888;
+        }
 
-button {
-  background-color: #0f0;
-  color: #000;
-  border: none;
-  padding: 10px 20px;
-  cursor: pointer;
-}
+        #bios-prompt {
+            font-size: 14px;
+            margin-top: 15px;
+            color: #555;
+        }
 
-button:hover {
-  background-color: #0c0;
-}
+        #login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
 
-#login-form input {
-  display: block;
-  margin-bottom: 10px;
-  padding: 5px;
-  width: 200px;
-}
+        #login-form {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.1);
+            width: 300px;
+        }
 
-</style>
+        #login-form h2 {
+            margin-top: 0;
+            margin-bottom: 30px;
+            font-weight: 300;
+            color: #0f0;
+            text-align: center;
+        }
+
+        #login-form input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        #login-form input::placeholder {
+            color: #555;
+        }
+
+        #login-form button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(90deg, #0f0, #00ff9d);
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #login-form button:hover {
+            background: linear-gradient(90deg, #00ff9d, #0f0);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 255, 0, 0.2);
+        }
+
+        #tap-to-continue {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 16px;
+            color: #0f0;
+            opacity: 0.7;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+    </style>
 </head>
 <body>
     <div id="boot-screen">
         <div class="boot-content">
-            <center><p id="tap-to-continue" style="color: #0f0; font-size: 16px; text-align: center; position: absolute; bottom: 20px; width: 100%;">Tap anywhere to continue</p></center>
+            <p id="tap-to-continue">Tap anywhere to continue</p>
             <div id="versaia-logo" class="logo-container">
-                <img src="https://shadowjhakx98.github.io/Versaia/icons/versaia.jpg" style="border-radius: 50%;" alt="VERSAIA OS Logo" class="boot-logo">
+                <img src="https://shadowjhakx98.github.io/Versaia/icons/versaia.jpg" alt="VERSAIA OS Logo" class="boot-logo">
                 <h1>VersaiaAI OS</h1>
                 <p id="bios-prompt">Press F2 for BIOS Settings</p>
-                
             </div>
-            <div id="nvidia-logo" class="logo-container" style="display: none; border-radius: 50%;">
+            <div id="nvidia-logo" class="logo-container" style="display: none;">
                 <img src="https://shadowjhakx98.github.io/Versaia/icons/nvidia-a100.jpg" alt="NVIDIA Logo" class="boot-logo">
                 <p>Powered by NVIDIA A100</p>
             </div>
-            <div id="amd-logo" class="logo-container" style="display: none; border-radius: 50%;">
+            <div id="amd-logo" class="logo-container" style="display: none;">
                 <img src="https://shadowjhakx98.github.io/Versaia/icons/amd-threadripper.jpg" alt="AMD Logo" class="boot-logo">
                 <p>Powered by AMD Threadripper</p>
             </div>
             <div id="boot-sequence" style="display: none;">
-                <div class="loading-bar">
-                    <div class="loading-progress"></div>
+                <div class="loading-container">
+                    <div class="aurora"></div>
+                    <div class="loading-bar">
+                        <div class="loading-progress"></div>
+                    </div>
                 </div>
                 <p id="boot-message">System Initializing...</p>
             </div>
         </div>
     </div>
 
-    <div id="bios-settings" style="display: none;">
-        <h2>BIOS Settings</h2>
-        <div class="settings-group">
-            <label for="boot-order">Boot Order:</label>
-            <select id="boot-order">
-                <option value="hdd">HDD</option>
-                <option value="ssd">SSD</option>
-                <option value="usb">USB</option>
-            </select>
-        </div>
-        <div class="settings-group">
-            <label for="cpu-clock">CPU Clock Speed:</label>
-            <input type="range" id="cpu-clock" min="1" max="5" step="0.1" value="3.5">
-            <span id="cpu-clock-value">3.5 GHz</span>
-        </div>
-        <button id="save-bios">Save and Exit</button>
-    </div>
-
     <div id="login-screen" style="display: none;">
-        <h2>Welcome to VERSAIA OS</h2>
         <form id="login-form">
+            <h2>Welcome to VERSAIA OS</h2>
             <input type="text" id="username" placeholder="Username" required>
             <input type="password" id="password" placeholder="Password" required>
             <button type="submit">Login</button>
         </form>
     </div>
+
+    <!-- Audio elements and script remain unchanged -->
 
     <audio id="versaia-sound" preload="auto">
         <source src="https://cdnjs.cloudflare.com/ajax/libs/ionic/1.3.2/fonts/ionicons.ttf" type="audio/mpeg">
