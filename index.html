@@ -379,14 +379,6 @@ document.addEventListener('DOMContentLoaded', () => {
         biosSettings.style.display = 'block';
     }
 
-    const saveBios = document.getElementById('save-bios');
-    saveBios.addEventListener('click', () => {
-        biosSettings.style.display = 'none';
-        bootScreen.style.display = 'flex';
-        inBiosSettings = false;
-        runBootSequence();
-    });
-
     function showLoginScreen() {
         bootScreen.style.opacity = '0';
         setTimeout(() => {
