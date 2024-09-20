@@ -24,9 +24,11 @@
 }
 
 .boot-logo {
-  max-width: 200px;
-  margin-bottom: 10px;
+  display: block;  /* Ensure the image is visible */
+  opacity: 1;      /* Fully opaque */
+  max-width: 100%;  /* Ensure the image scales correctly */
 }
+
 
 .loading-bar {
   width: 300px;
@@ -35,6 +37,9 @@
   margin: 20px auto;
   border-radius: 10px;
   overflow: hidden;
+  display: block;  /* Ensure the image is visible */
+  opacity: 1;      /* Fully opaque */
+  max-width: 100%;  /* Ensure the image scales correctly */
 }
 
 .loading-progress {
@@ -42,17 +47,26 @@
   height: 100%;
   background-color: #0f0;
   transition: width 2s linear;
+  display: block;  /* Ensure the image is visible */
+  opacity: 1;      /* Fully opaque */
+  max-width: 100%;  /* Ensure the image scales correctly */
 }
 
 #boot-message {
   font-size: 18px;
   margin-top: 20px;
+  display: block;  /* Ensure the image is visible */
+  opacity: 1;      /* Fully opaque */
+  max-width: 100%;  /* Ensure the image scales correctly */
 }
 
 #bios-prompt {
   font-size: 14px;
   margin-top: 10px;
   color: #888;
+  display: block;  /* Ensure the image is visible */
+  opacity: 1;      /* Fully opaque */
+  max-width: 100%;  /* Ensure the image scales correctly */
 }
 
 body {
