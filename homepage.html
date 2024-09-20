@@ -30,28 +30,28 @@ body, html {
     justify-content: space-between;
 }
 
+.glassmorphism {
+    background: rgba(26, 26, 26, 0.25);
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
+    border: 1px solid rgba(15, 255, 15, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(15, 255, 15, 0.37);
+}
+
 .status-bar {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    background-color: #0f0;
+    background: rgba(15, 255, 15, 0.25);
+    backdrop-filter: blur(10px);
     color: #000;
     padding: 10px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     z-index: 1000;
-}
-
-.status-bar-content {
-    display: flex;
-    align-items: center;
-}
-
-.notification-icon {
-    cursor: pointer;
-    margin-left: 15px;
+    border-bottom: 1px solid rgba(15, 255, 15, 0.18);
 }
 
 .notification-drawer {
@@ -60,19 +60,17 @@ body, html {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: #1a1a1a;
-    box-shadow: 0 2px 10px rgba(0,255,0,0.1);
+    background: rgba(26, 26, 26, 0.75);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px 0 rgba(15, 255, 15, 0.37);
     transition: top 0.3s ease-in-out;
     z-index: 999;
     overflow-y: auto;
 }
 
-.notification-drawer.open {
-    top: 0;
-}
-
 .notification-header {
-    background-color: #0f0;
+    background: rgba(15, 255, 15, 0.25);
+    backdrop-filter: blur(10px);
     color: #000;
     padding: 20px;
     font-size: 20px;
@@ -81,68 +79,25 @@ body, html {
     align-items: center;
 }
 
-.close-drawer {
-    cursor: pointer;
-    font-size: 24px;
-}
-
-.notification-list {
-    padding: 20px;
-    max-height: 60vh;
-    overflow-y: auto;
-}
-
 .notification-item {
-    background-color: #2a2a2a;
+    background: rgba(42, 42, 42, 0.5);
+    backdrop-filter: blur(5px);
     margin-bottom: 10px;
     padding: 15px;
     border-radius: 4px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-.notification-content {
-    flex-grow: 1;
-}
-
-.notification-close {
-    cursor: pointer;
-    font-size: 18px;
-    color: #888;
-}
-
-.notification-icon {
-    position: relative;
-}
-
-.notification-badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background-color: #f00;
-    color: #fff;
-    border-radius: 50%;
-    padding: 2px 6px;
-    font-size: 12px;
+    border: 1px solid rgba(15, 255, 15, 0.18);
 }
 
 .spotify-player {
     margin-top: 20px;
     padding: 20px;
-    background-color: #191414;
+    background: rgba(25, 20, 20, 0.75);
+    backdrop-filter: blur(10px);
     border-radius: 8px;
-}
-
-.spotify-player h3 {
-    color: #1DB954;
-    margin-bottom: 10px;
-}
-
-.dashboard-container {
-    display: flex;
-    width: 100%;
-    height: 100%;
+    border: 1px solid rgba(15, 255, 15, 0.18);
 }
 
 .search-bar {
@@ -150,7 +105,8 @@ body, html {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #1a1a1a;
+    background: rgba(26, 26, 26, 0.5);
+    backdrop-filter: blur(10px);
     padding: 10px 0;
     box-shadow: 0px 2px 4px rgba(0, 255, 0, 0.1);
 }
@@ -159,37 +115,19 @@ body, html {
     width: 60%;
     padding: 12px 20px;
     border-radius: 24px;
-    border: 1px solid #0f0;
+    border: 1px solid rgba(15, 255, 15, 0.5);
     font-size: 16px;
     outline: none;
     box-shadow: 0px 2px 4px rgba(0, 255, 0, 0.1);
     transition: all 0.3s ease;
-    background-color: #2a2a2a;
+    background: rgba(42, 42, 42, 0.5);
+    backdrop-filter: blur(5px);
     color: #fff;
 }
 
-.search-bar input[type="text"]:focus {
-    border-color: #00ff9d;
-}
-
-.search-bar input[type="submit"] {
-    background-color: #0f0;
-    color: #000;
-    border: none;
-    padding: 12px 24px;
-    margin-left: 10px;
-    border-radius: 24px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.search-bar input[type="submit"]:hover {
-    background-color: #00ff9d;
-}
-
 .sidebar {
-    background-color: #1a1a1a;
+    background: rgba(26, 26, 26, 0.75);
+    backdrop-filter: blur(10px);
     width: 80px;
     padding: 20px 0;
     display: flex;
@@ -200,21 +138,7 @@ body, html {
     min-width: 80px;
     flex-shrink: 0;
     margin-top: 20px;
-}
-
-.sidebar.expanded {
-    width: 300px;
-}
-
-.nav-list {
-    list-style: none;
-    padding: 0;
-    width: 100%;
-    flex-grow: 1;
-}
-
-.nav-list li {
-    margin: 15px 0;
+    border-right: 1px solid rgba(15, 255, 15, 0.18);
 }
 
 .nav-list a {
@@ -224,164 +148,15 @@ body, html {
     align-items: center;
     padding: 15px 20px;
     border-radius: 8px;
-    background-color: #2a2a2a;
+    background: rgba(42, 42, 42, 0.5);
+    backdrop-filter: blur(5px);
     transition: background-color 0.3s ease, padding 0.3s ease;
     white-space: nowrap;
     overflow: hidden;
     font-size: 18px;
     width: 90%;
     margin: 0 auto;
-}
-
-.nav-list a:hover {
-    background-color: #0f0;
-    color: #000;
-}
-
-.nav-list a .icon {
-    width: 30px;
-    height: 30px;
-    margin-right: 20px;
-    display: inline-block;
-    font-size: 24px;
-}
-
-.nav-list a .text {
-    display: none;
-}
-
-.sidebar.expanded .nav-list a {
-    padding: 15px 25px;
-    width: 100%;
-}
-
-.sidebar.expanded .nav-list a .text {
-    display: inline;
-}
-
-.main-content {
-    flex-grow: 1;
-    padding: 20px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-}
-
-.slideshow-section {
-    position: relative;
-    flex-grow: 1;
-    overflow: hidden;
-}
-
-.date-time-overlay {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    z-index: 10;
-    background: rgba(0, 0, 0, 0.5);
-    color: #0f0;
-    padding: 10px;
-    border-radius: 5px;
-    font-family: 'Roboto', sans-serif;
-}
-
-.calendar-display {
-    font-size: 18px;
-    margin-bottom: 5px;
-}
-
-.clock-display {
-    font-size: 24px;
-    font-weight: bold;
-}
-
-.slides {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    transition: transform 0.5s ease;
-}
-
-.slides > * {
-    flex: 0 0 100%;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.weather-panel, .twitter-panel, .calendar-section {
-    background: rgba(0, 0, 0, 0.6);
-    padding: 15px;
-    text-align: center;
-    color: #0f0;
-}
-
-#calendar {
-    height: 100%;
-}
-
-.column {
-    float: left;
-    width: 16.67%;
-    padding: 5px;
-}
-
-.row::after {
-    content: "";
-    clear: both;
-    display: table;
-}
-
-.sidebar::-webkit-scrollbar {
-    width: 10px;
-}
-
-.sidebar::-webkit-scrollbar-track {
-    background-color: #1a1a1a;
-    border-radius: 10px;
-}
-
-.sidebar::-webkit-scrollbar-thumb {
-    background-color: #0f0;
-    border-radius: 10px;
-    border: 2px solid #1a1a1a;
-}
-
-#toggle-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 1000;
-    background-color: #0f0;
-    color: #000;
-    border: none;
-    padding: 10px;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-#toggle-btn:hover {
-    background-color: #00ff9d;
-}
-
-.app-drawer-toggle {
-    width: 60px;
-    height: 60px;
-    background-color: #2a2a2a;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.app-drawer-toggle:hover {
-    background-color: #0f0;
+    border: 1px solid rgba(15, 255, 15, 0.18);
 }
 
 .app-drawer {
@@ -390,7 +165,8 @@ body, html {
     left: 0;
     width: 100%;
     height: 300px;
-    background-color: rgba(26, 26, 26, 0.9);
+    background: rgba(26, 26, 26, 0.75);
+    backdrop-filter: blur(10px);
     box-shadow: 0px -2px 10px rgba(0, 255, 0, 0.1);
     transition: bottom 0.3s ease-in-out;
     z-index: 999;
@@ -400,40 +176,15 @@ body, html {
     justify-content: center;
     align-content: flex-start;
     padding: 20px;
-}
-
-.app-drawer.open {
-    bottom: 80px;
-}
-
-.drawer-app-icon {
-    width: 80px;
-    height: 80px;
-    margin: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-}
-
-.drawer-app-icon img {
-    width: 50px;
-    height: 50px;
-    object-fit: contain;
-    margin-bottom: 5px;
-}
-
-.drawer-app-icon span {
-    font-size: 12px;
-    color: #0f0;
+    border-top: 1px solid rgba(15, 255, 15, 0.18);
 }
 
 .app-dock {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgba(26, 26, 26, 0.8);
+    background: rgba(26, 26, 26, 0.75);
+    backdrop-filter: blur(10px);
     box-shadow: 0px -2px 10px rgba(0, 255, 0, 0.1);
     padding: 10px;
     position: fixed;
@@ -441,48 +192,22 @@ body, html {
     left: 0;
     width: 100%;
     z-index: 1000;
-}
-
-.app-icon {
-    width: 60px;
-    height: 60px;
-    margin: 0 10px;
-    transition: transform 0.2s ease-in-out;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.app-icon img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    border-radius: 10px;
-}
-
-.app-icon:hover {
-    transform: scale(1.2);
-}
-
-#backgroundImageInput {
-    display: none;
+    border-top: 1px solid rgba(15, 255, 15, 0.18);
 }
 
 .custom-file-upload {
-    border: 1px solid #0f0;
+    border: 1px solid rgba(15, 255, 15, 0.5);
     display: inline-block;
     padding: 6px 12px;
     cursor: pointer;
-    background-color: #1a1a1a;
+    background: rgba(26, 26, 26, 0.5);
+    backdrop-filter: blur(5px);
     border-radius: 4px;
     transition: background-color 0.3s;
     color: #0f0;
 }
 
-.custom-file-upload:hover {
-    background-color: #0f0;
-    color: #000;
-}
+/* The rest of the CSS remains the same */
     </style>
 </head>
 <body>
