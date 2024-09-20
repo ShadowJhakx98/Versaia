@@ -9,6 +9,7 @@
     <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@mui/material@5.14.2/umd/material-ui.development.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.11.3/main.min.css">
+    <link rel="stylesheet" href="https://shadowjhakx98.github.io/Versaia/css/boot-screen.css">
     <style>
         * {
             margin: 0;
@@ -488,6 +489,69 @@
     </style>
 </head>
 <body>
+        <div id="boot-screen">
+        <div class="boot-content">
+            <div id="versaia-logo" class="logo-container">
+                <img src="/api/placeholder/200/100" alt="VERSAIA OS Logo" class="boot-logo">
+                <h1>VersaiaAI OS</h1>
+                <p id="bios-prompt">Press F2 for BIOS Settings</p>
+            </div>
+            <div id="nvidia-logo" class="logo-container" style="display: none;">
+                <img src="/api/placeholder/200/100" alt="NVIDIA Logo" class="boot-logo">
+                <p>Powered by NVIDIA A100</p>
+            </div>
+            <div id="amd-logo" class="logo-container" style="display: none;">
+                <img src="/api/placeholder/200/100" alt="AMD Logo" class="boot-logo">
+                <p>Powered by AMD Threadripper</p>
+            </div>
+            <div id="boot-sequence" style="display: none;">
+                <div class="loading-bar">
+                    <div class="loading-progress"></div>
+                </div>
+                <p id="boot-message">System Initializing...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="bios-settings" style="display: none;">
+        <h2>BIOS Settings</h2>
+        <div class="settings-group">
+            <label for="boot-order">Boot Order:</label>
+            <select id="boot-order">
+                <option value="hdd">HDD</option>
+                <option value="ssd">SSD</option>
+                <option value="usb">USB</option>
+            </select>
+        </div>
+        <div class="settings-group">
+            <label for="cpu-clock">CPU Clock Speed:</label>
+            <input type="range" id="cpu-clock" min="1" max="5" step="0.1" value="3.5">
+            <span id="cpu-clock-value">3.5 GHz</span>
+        </div>
+        <button id="save-bios">Save and Exit</button>
+    </div>
+
+    <div id="login-screen" style="display: none;">
+        <h2>Welcome to VERSAIA OS</h2>
+        <form id="login-form">
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
+    <audio id="versaia-sound" preload="auto">
+        <source src="https://cdnjs.cloudflare.com/ajax/libs/ionic/1.3.2/fonts/ionicons.ttf" type="audio/mpeg">
+    </audio>
+    <audio id="nvidia-sound" preload="auto">
+        <source src="https://cdnjs.cloudflare.com/ajax/libs/ionic/1.3.2/fonts/ionicons.ttf" type="audio/mpeg">
+    </audio>
+    <audio id="amd-sound" preload="auto">
+        <source src="https://cdnjs.cloudflare.com/ajax/libs/ionic/1.3.2/fonts/ionicons.ttf" type="audio/mpeg">
+    </audio>
+    <audio id="startup-sound" preload="auto">
+        <source src="https://cdnjs.cloudflare.com/ajax/libs/ionic/1.3.2/fonts/ionicons.ttf" type="audio/mpeg">
+    </audio>
         <!-- Status Bar -->
         <div class="status-bar">
             <div class="status-bar-content">
@@ -852,7 +916,7 @@
     
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.11.3/main.min.js"></script>
-
+    <script src="https://shadowjhakx98.github.io/Versaia/js/boot-screen.js"></script>
     <script>
 const API_BASE_URL = 'https://shadowjhakx98.pythonanywhere.com'
 // Utility Functions
