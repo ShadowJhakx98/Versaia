@@ -131,6 +131,15 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = 'https://shadowjhakx98.github.io/Versaia/homepage.html';
     });
 
-    // Start the boot sequence
-    runBootSequence();
+async function runBootSequence() {
+    console.log("Showing Versaia logo");
+    await showLogo(versaiaLogo, versaiaSound, 5000); // 2 seconds
+
+    console.log("Showing NVIDIA logo");
+    await showLogo(nvidiaLogo, nvidiaSound, 3000);  // 1.5 seconds
+
+    console.log("Showing AMD logo");
+    await showLogo(amdLogo, amdSound, 3000);  // 1.5 seconds
+}
+
 });
