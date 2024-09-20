@@ -858,15 +858,229 @@
         }
         </script>
     <script>
-    // Slideshow functionality
-    // Slideshow functionality
-    const slides = document.querySelector('.slides');
-    const slideElements = document.querySelectorAll('.slides > *');
-    const totalSlides = slideElements.length;
-    let slideOrder = [];
-    let slideIndex = 0;
+// Utility Functions
+function openApp(path) {
+    window.location.href = path;
+}
 
-    // Retrieve the last viewed slide index and slide order from localStorage, if available
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+// Slideshow Functionality
+const slides = document.querySelector('.slides');
+const slideElements = document.querySelectorAll('.slides > *');
+const totalSlides = slideElements.length;
+let slideOrder = [];
+let slideIndex = 0;
+
+function initializeSlideOrder() {
+    slideOrder = Array.from(Array(totalSlides).keys());
+    shuffle(slideOrder);
+}
+
+function showSlide(index) {
+    slides.style.transform = `translateX(-${index * 100}%)`;
+}
+
+function nextSlide() {
+    slideIndex = (slideIndex + 1) % totalSlides;
+    if (slideIndex === 0) {
+        shuffle(slideOrder);
+    }
+    showSlide(slideOrder[slideIndex]);
+    localStorage.setItem('lastSlideIndex', slideIndex);
+    localStorage.setItem('slideOrder', JSON.stringify(slideOrder));
+}
+
+// Weather Functionality
+async function fetchWeather() {
+    const apiKey = '03c0e16b1429800ac660ddde54706c28';
+    const city = 'Saluda,SC,US';
+    try {
+        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=imperial`);
+        const data = await response.json();
+        const weatherInfo = `${data.weather[0].description}, ${data.main.temp}°F`;
+        document.getElementById('weather-info').textContent = weatherInfo;
+    } catch (error) {
+        console.error('Error fetching weather:', error);
+    }
+}
+
+// Date and Clock Functionality
+function updateDateAndTime() {
+    const now = new Date();
+    const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const dateString = now.toLocaleDateString(undefined, dateOptions);
+    document.getElementById('date-display').textContent = dateString;
+    updateClock();
+}
+
+function updateClock() {
+    const now = new Date();
+    let hours = now.getHours();
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const seconds = now.getSeconds().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12;
+    const clockStr = `${hours}:${minutes}:${seconds} ${ampm}`;
+    document.getElementById('clock-display').textContent = clockStr;
+}
+
+// Notification Functionality
+let notificationCount = 0;
+const notificationList = document.getElementById('notificationList');
+const notificationBadge = document.getElementById('notificationBadge');
+
+function addNotification(title, body, source) {
+    const notificationItem = document.createElement('div');
+    notificationItem.className = 'notification-item';
+    notificationItem.innerHTML = `
+        <div class="notification-content">
+            <h3>${title}</h3>
+            <p>${body}</p>
+        </div>
+        <span class="notification-close" onclick="removeNotification(this)">×</span>
+    `;
+    notificationList.prepend(notificationItem);
+    notificationCount++;
+    updateNotificationBadge();
+    const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+    notifications.push({ title, body, source, timestamp: Date.now() });
+    localStorage.setItem('notifications', JSON.stringify(notifications));
+}
+
+function removeNotification(closeButton) {
+    const notificationItem = closeButton.parentElement;
+    notificationItem.remove();
+    notificationCount--;
+    updateNotificationBadge();
+    const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+    const index = Array.from(notificationList.children).indexOf(notificationItem);
+    notifications.splice(index, 1);
+    localStorage.setItem('notifications', JSON.stringify(notifications));
+}
+
+function updateNotificationBadge() {
+    notificationBadge.textContent = notificationCount;
+    notificationBadge.style.display = notificationCount > 0 ? 'inline' : 'none';
+}
+
+function loadNotifications() {
+    const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+    notifications.forEach(notification => {
+        addNotification(notification.title, notification.body, notification.source);
+    });
+    updateNotificationBadge();
+}
+
+function toggleNotificationDrawer() {
+    const drawer = document.getElementById('notificationDrawer');
+    drawer.classList.toggle('open');
+}
+
+// Pushbullet Integration
+let lastFetchedPushTime = 0;
+const PUSHBULLET_ACCESS_TOKEN = 'o.YR5tFQ9hjRfVV91s9RsYY1qXKZqDcOo6';
+
+function startPushbulletWebSocket() {
+    const socket = new WebSocket(`wss://stream.pushbullet.com/websocket/${PUSHBULLET_ACCESS_TOKEN}`);
+
+    socket.onopen = () => console.log('Connected to Pushbullet WebSocket.');
+    socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === 'tickle' && data.subtype === 'push') {
+            fetchNewPushes();
+        }
+    };
+    socket.onerror = (error) => console.error('Pushbullet WebSocket error:', error);
+    socket.onclose = () => {
+        console.log('Pushbullet WebSocket connection closed. Reconnecting...');
+        setTimeout(startPushbulletWebSocket, 5000);
+    };
+}
+
+async function fetchNewPushes() {
+    try {
+        const response = await fetch(`https://api.pushbullet.com/v2/pushes?limit=10&modified_after=${lastFetchedPushTime}`, {
+            method: 'GET',
+            headers: { 'Access-Token': PUSHBULLET_ACCESS_TOKEN }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            const pushes = data.pushes;
+            if (pushes.length > 0) {
+                lastFetchedPushTime = Math.max(...pushes.map(push => push.modified));
+                pushes.forEach(push => {
+                    const title = push.title || 'Pushbullet Notification';
+                    const body = push.body || 'You have a new notification';
+                    addNotification(title, body, 'Pushbullet');
+                });
+                console.log(`Fetched ${pushes.length} new notifications`);
+            }
+        } else if (response.status === 401) {
+            console.error('Pushbullet API authentication failed. Please check your access token.');
+            addNotification('Pushbullet Error', 'Failed to authenticate with Pushbullet. Please check your access token.', 'System');
+        } else {
+            throw new Error(response.statusText);
+        }
+    } catch (error) {
+        console.error('Error fetching Pushbullet notifications:', error);
+        addNotification('Pushbullet Error', `Error fetching notifications: ${error.message}`, 'System');
+    }
+}
+
+// Voice Recognition
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const recognition = new SpeechRecognition();
+recognition.interimResults = false;
+recognition.lang = 'en-US';
+
+const voiceIcon = document.getElementById('voice-icon');
+const startSound = new Audio("https://shadowjhakx98.github.io/Versaia/sounds/start-sound.mp3");
+const recognitionSound = new Audio("https://shadowjhakx98.github.io/Versaia/sounds/recognition-sound.mp3");
+const stopSound = new Audio("https://shadowjhakx98.github.io/Versaia/sounds/stop-sound.mp3");
+
+voiceIcon.addEventListener('click', () => {
+    startSound.play();
+    recognition.start();
+});
+
+recognition.addEventListener('result', async (event) => {
+    const transcript = event.results[0][0].transcript;
+    console.log('User said:', transcript);
+    recognitionSound.play();
+
+    try {
+        const response = await fetch('/process_speech', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ speech: transcript })
+        });
+        const data = await response.json();
+        console.log('AI response:', data.response);
+        alert(`AI says: ${data.response}`);
+
+        const synth = window.speechSynthesis;
+        const utterance = new SpeechSynthesisUtterance(data.response);
+        synth.speak(utterance);
+    } catch (error) {
+        console.error('Error processing speech:', error);
+    }
+});
+
+recognition.addEventListener('end', () => {
+    stopSound.play();
+    console.log('Speech recognition ended.');
+});
+
+// Event Listeners and Initialization
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize slideshow
     if (localStorage.getItem('lastSlideIndex')) {
         slideIndex = parseInt(localStorage.getItem('lastSlideIndex'));
     }
@@ -875,362 +1089,56 @@
     } else {
         initializeSlideOrder();
     }
-
-    function initializeSlideOrder() {
-        // Create a sequential array of slide indices
-        slideOrder = Array.from(Array(totalSlides).keys());
-        shuffle(slideOrder); // Shuffle the slide order
-    }
-
-    // Shuffle array using Fisher-Yates algorithm
-    function shuffle(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-    }
-
-    function showSlide(index) {
-        slides.style.transform = `translateX(-${index * 100}%)`;
-    }
-
-    function nextSlide() {
-        slideIndex = (slideIndex + 1) % totalSlides;
-        if (slideIndex === 0) {
-            shuffle(slideOrder); // Reshuffle when all slides have been shown
-        }
-        showSlide(slideOrder[slideIndex]);
-
-        // Store the current slide index and order in localStorage
-        localStorage.setItem('lastSlideIndex', slideIndex);
-        localStorage.setItem('slideOrder', JSON.stringify(slideOrder));
-    }
-
-    // Display the last viewed slide when the page loads
     showSlide(slideOrder[slideIndex]);
+    setInterval(nextSlide, 30000);
 
-    // Automatically move to the next slide every 30 seconds
-    setInterval(nextSlide, 30000); // Change slide every 30 seconds
-        // Weather functionality
-        async function fetchWeather() {
-            const apiKey = '03c0e16b1429800ac660ddde54706c28'; // Replace with your API key
-            const city = 'Saluda,SC,US';  // Replace with your preferred city
-            const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=imperial`);
-            const data = await response.json();
-            const weatherInfo = `${data.weather[0].description}, ${data.main.temp}°F`;
-            document.getElementById('weather-info').textContent = weatherInfo;
-        }
+    // Initialize weather, date, and time
+    fetchWeather();
+    updateDateAndTime();
+    setInterval(updateDateAndTime, 1000);
 
-        fetchWeather();
+    // Initialize sidebar toggle
+    const toggleBtn = document.getElementById('toggle-btn');
+    const sidebar = document.querySelector('.sidebar');
+    toggleBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('expanded');
+        toggleBtn.textContent = sidebar.classList.contains('expanded') ? '×' : '☰';
+    });
 
-        // Calendar functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            var calendarEl = document.getElementById('calendar');
-
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                events: [
-                    { title: 'Event 1', date: '2024-09-20' },
-                    { title: 'Event 2', date: '2024-09-25' }
-                ]
-            });
-
-            calendar.render();
-        });
-        
-        // Updated Date and Clock functionality with AM/PM
-        function updateDateAndTime() {
-            const now = new Date();
-            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const dateString = now.toLocaleDateString(undefined, dateOptions);
-            document.getElementById('date-display').textContent = dateString;
-            
-            updateClock();
-        }
-
-        function updateClock() {
-            const now = new Date();
-            let hours = now.getHours();
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            const seconds = now.getSeconds().toString().padStart(2, '0');
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            
-            hours = hours % 12;
-            hours = hours ? hours : 12; // the hour '0' should be '12'
-            hours = hours.toString().padStart(2, '0');
-            
-            const clockStr = `${hours}:${minutes}:${seconds} ${ampm}`;
-            document.getElementById('clock-display').textContent = clockStr;
-        }
-
-        // Initial update
-        updateDateAndTime();
-
-        // Update date and time every second
-        setInterval(updateDateAndTime, 1000);
-        // Updated Sidebar toggle functionality
-        const toggleBtn = document.getElementById('toggle-btn');
-        const sidebar = document.querySelector('.sidebar');
-
-        toggleBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('expanded');
-            toggleBtn.textContent = sidebar.classList.contains('expanded') ? '×' : '☰';
-        });
-        const backgroundImageInput = document.getElementById('backgroundImageInput');
-
-        backgroundImageInput.addEventListener('change', (event) => {
-            const file = event.target.files[0]; 
-
-
-                if (file) {
-                    const reader = new FileReader();
-
-                    reader.onload = (event) => {
-                        const 
-        body = document.body;
-            body.style.backgroundImage = `url(${event.target.result})`;
-            body.style.backgroundSize = 'cover';
-            body.style.backgroundPosition = 'center';
+    // Initialize background image input
+    const backgroundImageInput = document.getElementById('backgroundImageInput');
+    backgroundImageInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.body.style.backgroundImage = `url(${e.target.result})`;
+                document.body.style.backgroundSize = 'cover';
+                document.body.style.backgroundPosition = 'center';
             };
-
             reader.readAsDataURL(file);
         }
     });
-        // App Drawer Functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const appDrawerToggle = document.getElementById('appDrawerToggle');
-            const appDrawer = document.getElementById('appDrawer');
 
-            appDrawerToggle.addEventListener('click', function() {
-                appDrawer.classList.toggle('open');
-            });
-
-            // Close drawer when clicking outside
-            document.addEventListener('click', function(event) {
-                if (!appDrawer.contains(event.target) && !appDrawerToggle.contains(event.target)) {
-                    appDrawer.classList.remove('open');
-                }
-            });
-        });
-        let notificationCount = 0;
-        const notificationList = document.getElementById('notificationList');
-        const notificationBadge = document.getElementById('notificationBadge');
-
-        // Request notification permission
-        if ("Notification" in window) {
-            Notification.requestPermission().then(function (permission) {
-                if (permission === "granted") {
-                    console.log("Notification permission granted.");
-                }
-            });
+    // Initialize app drawer
+    const appDrawerToggle = document.getElementById('appDrawerToggle');
+    const appDrawer = document.getElementById('appDrawer');
+    appDrawerToggle.addEventListener('click', () => appDrawer.classList.toggle('open'));
+    document.addEventListener('click', (event) => {
+        if (!appDrawer.contains(event.target) && !appDrawerToggle.contains(event.target)) {
+            appDrawer.classList.remove('open');
         }
+    });
 
-        // Function to add a notification to the drawer
-        function addNotification(title, body, source) {
-            const notificationItem = document.createElement('div');
-            notificationItem.className = 'notification-item';
-            notificationItem.innerHTML = `
-                <div class="notification-content">
-                    <h3>${title}</h3>
-                    <p>${body}</p>
-                </div>
-                <span class="notification-close" onclick="removeNotification(this)">×</span>
-            `;
-            notificationList.prepend(notificationItem);
-            notificationCount++;
-            updateNotificationBadge();
-            // Save notification to local storage
-            const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
-            notifications.push({ title, body, source, timestamp: Date.now() });
-            localStorage.setItem('notifications', JSON.stringify(notifications));
-        }
-
-        // Function to remove a notification
-        function removeNotification(closeButton) {
-            const notificationItem = closeButton.parentElement;
-            const index = Array.from(notificationList.children).indexOf(notificationItem);
-            notificationItem.remove();
-            const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
-            notifications.splice(index, 1);
-            localStorage.setItem('notifications', JSON.stringify(notifications));
-            closeButton.parentElement.remove();
-            notificationCount--;
-            updateNotificationBadge();
-        }
-        function loadNotifications() {
-            const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
-            notifications.forEach(notification => {
-                addNotificationToDrawer(notification.title, notification.body, notification.source);
-            });
-            updateNotificationBadge();
-        }
-        // Function to update the notification badge
-        function updateNotificationBadge() {
-            notificationBadge.textContent = notificationCount;
-            notificationBadge.style.display = notificationCount > 0 ? 'inline' : 'none';
-        }
-        // Listen for messages from the Chrome extension
-        if (typeof chrome !== 'undefined' && chrome.runtime) {
-            chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-                if (message.type === 'notification') {
-                    // Add the intercepted notification to the webpage drawer
-                    addNotification(message.title, message.body);
-                }
-            });
-        } 
-        // Notification Drawer Functionality
-        function toggleNotificationDrawer() {
-            const drawer = document.getElementById('notificationDrawer');
-            drawer.classList.toggle('open');
-        }
-// Pushbullet integration using WebSocket
-let lastFetchedPushTime = 0;
-
-function startPushbulletWebSocket() {
-    const accessToken = 'o.YR5tFQ9hjRfVV91s9RsYY1qXKZqDcOo6'; // Replace with your actual Pushbullet API token
-
-    const socket = new WebSocket(`wss://stream.pushbullet.com/websocket/${accessToken}`);
-
-    socket.onopen = () => {
-        console.log('Connected to Pushbullet WebSocket.');
-    };
-
-    socket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-
-        // Check if the message is a push event
-        if (data.type === 'tickle' && data.subtype === 'push') {
-            fetchNewPushes(); // Fetch new pushes when a push event occurs
-        }
-    };
-
-    socket.onerror = (error) => {
-        console.error('Pushbullet WebSocket error:', error);
-    };
-
-    socket.onclose = () => {
-        console.log('Pushbullet WebSocket connection closed. Reconnecting...');
-        // Try to reconnect after 5 seconds if the connection closes
-        setTimeout(startPushbulletWebSocket, 5000);
-    };
-}
-
-// Function to fetch new Pushbullet pushes after receiving a WebSocket event
-async function fetchNewPushes() {
-    const accessToken = 'o.YR5tFQ9hjRfVV91s9RsYY1qXKZqDcOo6'; // Replace with your actual Pushbullet API token
-    try {
-        const response = await fetch(`https://api.pushbullet.com/v2/pushes?limit=10&modified_after=${lastFetchedPushTime}`, {
-            method: 'GET',
-            headers: {
-                'Access-Token': accessToken
-            }
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            const pushes = data.pushes;
-
-            // Update the last fetched time
-            if (pushes.length > 0) {
-                lastFetchedPushTime = Math.max(...pushes.map(push => push.modified));
-            }
-
-            // Use all pushes without filtering
-            const allPushes = pushes;
-
-            // Display the notifications in your custom drawer
-            allPushes.forEach(push => {
-                const title = push.title || 'Pushbullet Notification';
-                const body = push.body || 'You have a new notification';
-                addNotification(title, body, 'Pushbullet');
-            });
-
-            if (filteredPushes.length > 0) {
-                console.log(`Fetched ${filteredPushes.length} new notifications`);
-            }
-        } else if (response.status === 401) {
-            console.error('Pushbullet API authentication failed. Please check your access token.');
-            addNotification('Pushbullet Error', 'Failed to authenticate with Pushbullet. Please check your access token.', 'System');
-        } else {
-            console.error('Failed to fetch Pushbullet notifications:', response.statusText);
-            addNotification('Pushbullet Error', `Failed to fetch notifications: ${response.statusText}`, 'System');
-        }
-    } catch (error) {
-        console.error('Error fetching Pushbullet notifications:', error);
-        addNotification('Pushbullet Error', `Error fetching notifications: ${error.message}`, 'System');
+    // Initialize notifications
+    loadNotifications();
+    if ("Notification" in window) {
+        Notification.requestPermission();
     }
-}
 
-// Start WebSocket connection when the page loads
-window.addEventListener('load', startPushbulletWebSocket);
-
-// Test function for Pushbullet integration (can be triggered manually for testing)
-function testPushbullet() {
-    fetchNewPushes();
-}
-        const API_URL = 'https://shadowjhakx98.pythonanywhere.com';
-
-async function getSuggestions(task) {
-  const response = await fetch(`${API_URL}/get_suggestions`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ task })
-  });
-  return response.json();
-}
-    // Check if the browser supports Web Speech API
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
-
-    recognition.interimResults = false;
-    recognition.lang = 'en-US';
-
-    const voiceIcon = document.getElementById('voice-icon');
-
-    // When the user clicks the microphone icon (activate)
-    voiceIcon.addEventListener('click', function() {
-        startSound.play();  // Play start sound
-        recognition.start();  // Start listening
-    });
-
-    // When speech is recognized
-    recognition.addEventListener('result', function(event) {
-        const transcript = event.results[0][0].transcript;
-        console.log('User said:', transcript);
-
-        // Play recognition sound
-        recognitionSound.play();
-
-        // Send the transcript to the Flask backend for AI processing
-        fetch('/process_speech', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ speech: transcript })
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('AI response:', data.response);
-            alert(`AI says: ${data.response}`);
-        });
-    });
-
-    // When speech recognition ends or is deactivated
-    recognition.addEventListener('end', function() {
-        stopSound.play();  // Play stop sound
-        console.log('Speech recognition ended.');
-    });
-    const synth = window.speechSynthesis;
-    const utterance = new SpeechSynthesisUtterance(data.response);
-    synth.speak(utterance);
-    const startSound = new Audio("https://shadowjhakx98.github.io/Versaia/sounds/start-sound.mp3") }}');
-    const recognitionSound = new Audio("https://shadowjhakx98.github.io/Versaia/sounds/recognition-sound.mp3") }}');
-    const stopSound = new Audio("https://shadowjhakx98.github.io/Versaia/sounds/stop-sound.mp3") }}');
-
-
-
-
+    // Initialize Pushbullet
+    startPushbulletWebSocket();
+});
     </script>
     <script>
     import * as React from 'react';
