@@ -31,7 +31,8 @@
 }
 
 .boot-logo {
-  max-width: 200px;
+  width: 200px;
+  height: 200px;
   margin-bottom: 10px;
 }
 
@@ -122,6 +123,8 @@ button:hover {
                 <img src="https://shadowjhakx98.github.io/Versaia/icons/versaia.jpg" style="border-radius: 50%;" alt="VERSAIA OS Logo" class="boot-logo">
                 <h1>VersaiaAI OS</h1>
                 <p id="bios-prompt">Press F2 for BIOS Settings</p>
+                <p id="bios-prompt">Tap anywhere to continue</p>
+                
             </div>
             <div id="nvidia-logo" class="logo-container" style="display: none;">
                 <img src="https://shadowjhakx98.github.io/Versaia/icons/nvidia-a100.jpg" alt="NVIDIA Logo" class="boot-logo">
@@ -213,6 +216,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let messageIndex = 0;
     let inBiosSettings = false;
+   let userInteracted = false;
+
+    // Wait for user interaction
+    document.addEventListener('click', () => {
+        if (!userInteracted) {
+            userInteracted = true;
+            console.log("User interacted, allowing sounds to play.");
+            runBootSequence();
+        }
+    });
 
     function showLogo(logoElement, soundElement, duration) {
         return new Promise((resolve) => {
