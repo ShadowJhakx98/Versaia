@@ -253,13 +253,15 @@ document.addEventListener('DOMContentLoaded', () => {
         // Start main boot sequence
         bootSequence.style.display = 'block';
         startupSound.play().catch(e => console.error("Startup sound play failed:", e));
-        // Wait for user interaction
-        document.addEventListener('click', () => {
-            if (!userInteracted) {
-                userInteracted = true;
-                console.log("User interacted, allowing sounds to play.");
-                runBootSequence();
-            }
+        // Function to wait for user interaction
+        function waitForUserInteraction() {
+            return new Promise((resolve) => {
+                document.addEventListener('click', () => {
+                    console.log("User clicked, continuing boot sequence...");
+                    resolve();
+                }, { once: true });  // Ensures the listener runs only once
+            });
+        }
     });
         function displayNextMessage() {
             if (messageIndex < messages.length) {
