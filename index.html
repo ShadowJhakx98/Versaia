@@ -370,12 +370,6 @@ document.addEventListener('DOMContentLoaded', () => {
         biosSettings.style.display = 'block';
     }
 
-    // BIOS Settings
-    const cpuClock = document.getElementById('cpu-clock');
-        cpuClock.addEventListener('input', () => {
-        cpuClockValue.textContent = `${cpuClock.value} GHz`;
-    });
-
     const saveBios = document.getElementById('save-bios');
     saveBios.addEventListener('click', () => {
         biosSettings.style.display = 'none';
