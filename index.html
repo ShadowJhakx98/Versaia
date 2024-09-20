@@ -1175,6 +1175,41 @@ async function getSuggestions(task) {
   });
   return response.json();
 }
+    // Check if the browser supports Web Speech API
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    const voiceIcon = document.getElementById('voice-icon');
+
+    voiceIcon.addEventListener('click', function() {
+        recognition.start();  // Start listening
+    });
+
+    recognition.addEventListener('result', function(event) {
+        const transcript = event.results[0][0].transcript;
+        console.log('User said:', transcript);
+
+        // Send the transcript to the Flask backend for AI processing
+        fetch('/process_speech', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ speech: transcript })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('AI response:', data.response);
+            alert(`AI says: ${data.response}`);
+        });
+    });
+
+    recognition.addEventListener('end', function() {
+        console.log('Speech recognition ended.');
+    });
 
 
 
