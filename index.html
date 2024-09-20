@@ -1041,19 +1041,62 @@ recognition.interimResults = false;
 recognition.lang = 'en-US';
 
 const voiceIcon = document.getElementById('voice-icon');
-const startSound = new Audio("https://shadowjhakx98.github.io/Versaia/sounds/start-sound.mp3");
-const recognitionSound = new Audio("https://shadowjhakx98.github.io/Versaia/sounds/recognition-sound.mp3");
-const stopSound = new Audio("https://shadowjhakx98.github.io/Versaia/sounds/stop-sound.mp3");
+let audioContext;
+let startSound, recognitionSound, stopSound;
 
-voiceIcon.addEventListener('click', () => {
-    startSound.play();
-    recognition.start();
+function initializeAudio() {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function loadSound(url) {
+        return fetch(url)
+            .then(response => response.arrayBuffer())
+            .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer));
+    }
+
+    return Promise.all([
+        loadSound("https://shadowjhakx98.github.io/Versaia/sounds/start-sound.mp3"),
+        loadSound("https://shadowjhakx98.github.io/Versaia/sounds/recognition-sound.mp3"),
+        loadSound("https://shadowjhakx98.github.io/Versaia/sounds/stop-sound.mp3")
+    ]).then(([start, recognition, stop]) => {
+        startSound = start;
+        recognitionSound = recognition;
+        stopSound = stop;
+    });
+}
+
+function playSound(audioBuffer) {
+    if (audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
+    const source = audioContext.createBufferSource();
+    source.buffer = audioBuffer;
+    source.connect(audioContext.destination);
+    source.start(0);
+}
+
+voiceIcon.addEventListener('click', async () => {
+    if (!audioContext) {
+        try {
+            await initializeAudio();
+        } catch (error) {
+            console.error('Failed to initialize audio:', error);
+            alert('Failed to initialize audio. Voice recognition may not work properly.');
+        }
+    }
+
+    if (audioContext) {
+        playSound(startSound);
+        recognition.start();
+    }
 });
 
 recognition.addEventListener('result', async (event) => {
     const transcript = event.results[0][0].transcript;
     console.log('User said:', transcript);
-    recognitionSound.play();
+    
+    if (audioContext) {
+        playSound(recognitionSound);
+    }
 
     try {
         const response = await fetch('/process_speech', {
@@ -1074,7 +1117,9 @@ recognition.addEventListener('result', async (event) => {
 });
 
 recognition.addEventListener('end', () => {
-    stopSound.play();
+    if (audioContext) {
+        playSound(stopSound);
+    }
     console.log('Speech recognition ended.');
 });
 
@@ -1139,6 +1184,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize Pushbullet
     startPushbulletWebSocket();
 });
+    // Initialize voice recognition
+    voiceIcon.addEventListener('click', () => {
+        if (audioContext && audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+    });
+});
+
     </script>
     <script>
     import * as React from 'react';
