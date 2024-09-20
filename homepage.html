@@ -1137,8 +1137,55 @@
     // Initialize components on page load
     document.addEventListener('DOMContentLoaded', function() {
         loadNotifications();
+        slideshow.init();
+        weather.fetchWeather();
+        dateAndClock.init();
+        notifications.init();
         pushbullet.startPolling();
         voiceRecognition.init();
+        // Initialize sidebar toggle
+        const toggleBtn = document.getElementById('toggle-btn');
+        const sidebar = document.querySelector('.sidebar');
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('expanded');
+            toggleBtn.textContent = sidebar.classList.contains('expanded') ? '×' : '☰';
+        });
+
+
+        // Initialize background image input
+        const backgroundImageInput = document.getElementById('backgroundImageInput');
+        backgroundImageInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.body.style.backgroundImage = `url(${e.target.result})`;
+                    document.body.style.backgroundSize = 'cover';
+                    document.body.style.backgroundPosition = 'center';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        // Initialize app drawer
+        const appDrawerToggle = document.getElementById('appDrawerToggle');
+        const appDrawer = document.getElementById('appDrawer');
+        appDrawerToggle.addEventListener('click', () => appDrawer.classList.toggle('open'));
+        document.addEventListener('click', (event) => {
+            if (!appDrawer.contains(event.target) && !appDrawerToggle.contains(event.target)) {
+                appDrawer.classList.remove('open');
+            }
+        });
+    // Initialize notifications permission
+        if ("Notification" in window) {
+            Notification.requestPermission();
+        }
+
+        // Initialize task suggestions
+        const taskInput = document.getElementById('task-input');
+        const getSuggestionsBtn = document.getElementById('get-suggestions-btn');
+        getSuggestionsBtn.addEventListener('click', () => {
+            taskSuggestions.displaySuggestions(taskInput.value);
+        });
     });
 </script>    
     <script>
