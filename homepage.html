@@ -876,64 +876,116 @@ const utilityFunctions = {
     }
 };
 
-// Slideshow Functionality
-const slides = document.querySelector('.slides');
-const slideElements = document.querySelectorAll('.slides > *');
-const totalSlides = slideElements.length;
-let slideOrder = [];
-let slideIndex = 0;
+    // Slideshow functionality
+    // Slideshow functionality
+    const slides = document.querySelector('.slides');
+    const slideElements = document.querySelectorAll('.slides > *');
+    const totalSlides = slideElements.length;
+    let slideOrder = [];
+    let slideIndex = 0;
 
-function initializeSlideOrder() {
-    slideOrder = Array.from(Array(totalSlides).keys());
-    shuffle(slideOrder);
-}
-
-function showSlide(index) {
-    slides.style.transform = `translateX(-${index * 100}%)`;
-}
-
-function nextSlide() {
-    slideIndex = (slideIndex + 1) % totalSlides;
-    if (slideIndex === 0) {
-        shuffle(slideOrder);
+    // Retrieve the last viewed slide index and slide order from localStorage, if available
+    if (localStorage.getItem('lastSlideIndex')) {
+        slideIndex = parseInt(localStorage.getItem('lastSlideIndex'));
     }
-    showSlide(slideOrder[slideIndex]);
-    localStorage.setItem('lastSlideIndex', slideIndex);
-    localStorage.setItem('slideOrder', JSON.stringify(slideOrder));
-}
+    if (localStorage.getItem('slideOrder')) {
+        slideOrder = JSON.parse(localStorage.getItem('slideOrder'));
+    } else {
+        initializeSlideOrder();
+    }
 
-// Weather Functionality
-const weather = {
-    async fetchWeather() {
-        try {
-            const data = await utilityFunctions.fetchJSON(`${API_BASE_URL}/weather`);
-            const weatherInfo = `${data.description}, ${data.temperature}°F`;
-            document.getElementById('weather-info').textContent = weatherInfo;
-        } catch (error) {
-            console.error('Error fetching weather:', error);
+    function initializeSlideOrder() {
+        // Create a sequential array of slide indices
+        slideOrder = Array.from(Array(totalSlides).keys());
+        shuffle(slideOrder); // Shuffle the slide order
+    }
+
+    // Shuffle array using Fisher-Yates algorithm
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
         }
     }
-};
 
-// Date and Clock Functionality
-function updateDateAndTime() {
-    const now = new Date();
-    const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    const dateString = now.toLocaleDateString(undefined, dateOptions);
-    document.getElementById('date-display').textContent = dateString;
-    updateClock();
-}
+    function showSlide(index) {
+        slides.style.transform = `translateX(-${index * 100}%)`;
+    }
 
-function updateClock() {
-    const now = new Date();
-    let hours = now.getHours();
-    const minutes = now.getMinutes().toString().padStart(2, '0');
-    const seconds = now.getSeconds().toString().padStart(2, '0');
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12 || 12;
-    const clockStr = `${hours}:${minutes}:${seconds} ${ampm}`;
-    document.getElementById('clock-display').textContent = clockStr;
-}
+    function nextSlide() {
+        slideIndex = (slideIndex + 1) % totalSlides;
+        if (slideIndex === 0) {
+            shuffle(slideOrder); // Reshuffle when all slides have been shown
+        }
+        showSlide(slideOrder[slideIndex]);
+
+        // Store the current slide index and order in localStorage
+        localStorage.setItem('lastSlideIndex', slideIndex);
+        localStorage.setItem('slideOrder', JSON.stringify(slideOrder));
+    }
+
+    // Display the last viewed slide when the page loads
+    showSlide(slideOrder[slideIndex]);
+
+    // Automatically move to the next slide every 30 seconds
+    setInterval(nextSlide, 30000); // Change slide every 30 seconds
+        // Weather functionality
+        async function fetchWeather() {
+            const apiKey = '03c0e16b1429800ac660ddde54706c28'; // Replace with your API key
+            const city = 'Saluda,SC,US';  // Replace with your preferred city
+            const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=imperial`);
+            const data = await response.json();
+            const weatherInfo = `${data.weather[0].description}, ${data.main.temp}°F`;
+            document.getElementById('weather-info').textContent = weatherInfo;
+        }
+
+        fetchWeather();
+
+        // Calendar functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                events: [
+                    { title: 'Event 1', date: '2024-09-20' },
+                    { title: 'Event 2', date: '2024-09-25' }
+                ]
+            });
+
+            calendar.render();
+        });
+        
+        // Updated Date and Clock functionality with AM/PM
+        function updateDateAndTime() {
+            const now = new Date();
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const dateString = now.toLocaleDateString(undefined, dateOptions);
+            document.getElementById('date-display').textContent = dateString;
+            
+            updateClock();
+        }
+
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            hours = hours.toString().padStart(2, '0');
+            
+            const clockStr = `${hours}:${minutes}:${seconds} ${ampm}`;
+            document.getElementById('clock-display').textContent = clockStr;
+        }
+
+        // Initial update
+        updateDateAndTime();
+
+        // Update date and time every second
+        setInterval(updateDateAndTime, 1000);
 
 // Notification Functionality
 let notificationCount = 0;
