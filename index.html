@@ -119,11 +119,11 @@ button:hover {
 <body>
     <div id="boot-screen">
         <div class="boot-content">
+            <p id="tap-to-continue" style="color: #0f0; font-size: 16px; text-align: center; position: absolute; bottom: 20px; width: 100%;">Tap anywhere to continue</p>
             <div id="versaia-logo" class="logo-container">
                 <img src="https://shadowjhakx98.github.io/Versaia/icons/versaia.jpg" style="border-radius: 50%;" alt="VERSAIA OS Logo" class="boot-logo">
                 <h1>VersaiaAI OS</h1>
                 <p id="bios-prompt">Press F2 for BIOS Settings</p>
-                <p id="bios-prompt">Tap anywhere to continue</p>
                 
             </div>
             <div id="nvidia-logo" class="logo-container" style="display: none;">
@@ -240,6 +240,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function runBootSequence() {
+        const tapMessage = document.getElementById('tap-to-continue');
+        // Show "Tap anywhere to continue" message
+        tapMessage.style.display = 'block';
+        // Wait for user to click anywhere
+        await waitForUserInteraction();
+
+        // Hide the tap message after the user interacts
+        tapMessage.style.display = 'none';
         // Show Versaia logo
         await showLogo(versaiaLogo, versaiaSound, 5000);
         
