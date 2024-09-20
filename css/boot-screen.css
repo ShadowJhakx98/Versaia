@@ -37,9 +37,6 @@
   margin: 20px auto;
   border-radius: 10px;
   overflow: hidden;
-  display: block;  /* Ensure the image is visible */
-  opacity: 1;      /* Fully opaque */
-  max-width: 100%;  /* Ensure the image scales correctly */
 }
 
 .loading-progress {
@@ -47,38 +44,25 @@
   height: 100%;
   background-color: #0f0;
   transition: width 2s linear;
-  display: block;  /* Ensure the image is visible */
-  opacity: 1;      /* Fully opaque */
-  max-width: 100%;  /* Ensure the image scales correctly */
 }
 
 #boot-message {
   font-size: 18px;
   margin-top: 20px;
-  display: block;  /* Ensure the image is visible */
-  opacity: 1;      /* Fully opaque */
-  max-width: 100%;  /* Ensure the image scales correctly */
 }
 
 #bios-prompt {
   font-size: 14px;
   margin-top: 10px;
   color: #888;
-  display: block;  /* Ensure the image is visible */
-  opacity: 1;      /* Fully opaque */
-  max-width: 100%;  /* Ensure the image scales correctly */
 }
 
 body {
-  visibility: hidden;
   background-color: #222;
   color: #fff;
   font-family: Arial, sans-serif;
 }
 
-body.loaded {
-  visibility: visible;
-}
 
 #bios-settings, #login-screen {
   position: fixed;
