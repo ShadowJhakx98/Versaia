@@ -126,6 +126,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // For this example, we'll just log the values and hide the login screen
         console.log(`Login attempt - Username: ${username}, Password: ${password}`);
         loginScreen.style.display = 'none';
+        // Redirect to homepage after login
+        window.location.href = 'https://shadowjhakx98.github.io/Versaia/homepage.html';
     });
 
     // Start the boot sequence
