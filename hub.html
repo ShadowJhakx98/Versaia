@@ -585,6 +585,30 @@
         <div class="main-content">
             <!-- Slideshow Section -->
             <div class="slideshow-section">
+                    <input type="text" id="searchInput" placeholder="Enter your search query">
+                    <button onclick="performSearch()">Search</button>
+                    <div id="results"></div>
+
+    <script>
+        function performSearch() {
+            const query = document.getElementById('searchInput').value;
+            fetch('shadowjhakx98.pythonanywhere.com/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query: query }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('results').innerText = data.result;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('results').innerText = 'An error occurred while searching.';
+            });
+        }
+    </script>
                 <div class="date-time-overlay">
                     <div class="calendar-display" id="date-display"></div>
                     <div class="clock-display" id="clock-display"></div>
