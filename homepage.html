@@ -8,483 +8,483 @@
     <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@mui/material@5.14.2/umd/material-ui.development.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.11.3/main.min.css">
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        /* Status Bar Styles */
+        .status-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #2196f3;
+            color: white;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+        }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+        .status-bar-content {
+            display: flex;
+            align-items: center;
+        }
 
-body, html {
-    padding-top: 50px;
-    font-family: 'Roboto', sans-serif;
-    background-color: #000;
-    color: #fff;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
+        .notification-icon {
+            cursor: pointer;
+            margin-left: 15px;
+        }
 
-.status-bar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    background-color: #0f0;
-    color: #000;
-    padding: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    z-index: 1000;
-}
+        /* Notification Drawer Styles */
+        .notification-drawer {
+            position: fixed;
+            top: -100%;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: top 0.3s ease-in-out;
+            z-index: 999;
+            overflow-y: auto;
+        }
 
-.status-bar-content {
-    display: flex;
-    align-items: center;
-}
+        .notification-drawer.open {
+            top: 0;
+        }
 
-.notification-icon {
-    cursor: pointer;
-    margin-left: 15px;
-}
+        .notification-header {
+            background-color: #2196f3;
+            color: white;
+            padding: 20px;
+            font-size: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-.notification-drawer {
-    position: fixed;
-    top: -100%;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #1a1a1a;
-    box-shadow: 0 2px 10px rgba(0,255,0,0.1);
-    transition: top 0.3s ease-in-out;
-    z-index: 999;
-    overflow-y: auto;
-}
+        .close-drawer {
+            cursor: pointer;
+            font-size: 24px;
+        }
 
-.notification-drawer.open {
-    top: 0;
-}
+        /* Updated Notification Styles */
+        .notification-list {
+            padding: 20px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
 
-.notification-header {
-    background-color: #0f0;
-    color: #000;
-    padding: 20px;
-    font-size: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+        .notification-item {
+            background-color: #f5f5f5;
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-.close-drawer {
-    cursor: pointer;
-    font-size: 24px;
-}
+        .notification-content {
+            flex-grow: 1;
+        }
 
-.notification-list {
-    padding: 20px;
-    max-height: 60vh;
-    overflow-y: auto;
-}
+        .notification-close {
+            cursor: pointer;
+            font-size: 18px;
+            color: #888;
+        }
 
-.notification-item {
-    background-color: #2a2a2a;
-    margin-bottom: 10px;
-    padding: 15px;
-    border-radius: 4px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+        .notification-icon {
+            position: relative;
+        }
 
-.notification-content {
-    flex-grow: 1;
-}
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: red;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+        }
+        
+        /* Spotify Player Styles */
+        .spotify-player {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #191414;
+            border-radius: 8px;
+        }
 
-.notification-close {
-    cursor: pointer;
-    font-size: 18px;
-    color: #888;
-}
+        .spotify-player h3 {
+            color: #1DB954;
+            margin-bottom: 10px;
+        }
 
-.notification-icon {
-    position: relative;
-}
+        body, html {
+            padding-top: 50px; /* Height of the status bar */
+            font-family: 'Open Sans', sans-serif;
+            background-color: #1f1f1f;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            flex-direction: column;
+            justify-content: space-between;
 
-.notification-badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background-color: #f00;
-    color: #fff;
-    border-radius: 50%;
-    padding: 2px 6px;
-    font-size: 12px;
-}
+        }
+        
+        .dashboard-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Search bar styling */
+        .search-bar {
+            top: 50px; /* Push down by the height of the status bar */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #fff;
+            padding: 10px 0;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .search-bar input[type="text"] {
+            width: 60%;
+            padding: 12px 20px;
+            border-radius: 24px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            outline: none;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
 
-.spotify-player {
-    margin-top: 20px;
-    padding: 20px;
-    background-color: #191414;
-    border-radius: 8px;
-}
+        .search-bar input[type="text"]:focus {
+            border-color: #4285f4;
+        }
 
-.spotify-player h3 {
-    color: #1DB954;
-    margin-bottom: 10px;
-}
+        .search-bar input[type="submit"] {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin-left: 10px;
+            border-radius: 24px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
 
-.dashboard-container {
-    display: flex;
-    width: 100%;
-    height: 100%;
-}
+        .search-bar input[type="submit"]:hover {
+            background-color: #357ae8;
+        }
 
-.search-bar {
-    top: 50px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #1a1a1a;
-    padding: 10px 0;
-    box-shadow: 0px 2px 4px rgba(0, 255, 0, 0.1);
-}
+        .sidebar {
+            background-color: #2c3e50;
+            width: 80px;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: auto;
+            transition: width 0.3s ease;
+            min-width: 80px; /* Ensure a minimum width */
+            flex-shrink: 0; /* Prevent sidebar from shrinking */
+            margin-top: 20px; /* Space between search bar and slideshow */
+        }
 
-.search-bar input[type="text"] {
-    width: 60%;
-    padding: 12px 20px;
-    border-radius: 24px;
-    border: 1px solid #0f0;
-    font-size: 16px;
-    outline: none;
-    box-shadow: 0px 2px 4px rgba(0, 255, 0, 0.1);
-    transition: all 0.3s ease;
-    background-color: #2a2a2a;
-    color: #fff;
-}
+        .sidebar.expanded {
+            width: 300px;
+        }
 
-.search-bar input[type="text"]:focus {
-    border-color: #00ff9d;
-}
+        .nav-list {
+            list-style: none;
+            padding: 0;
+            width: 100%;
+            flex-grow: 1; /* Allow nav list to expand within the sidebar */
+        }
+        
+        .nav-list li {
+            margin: 15px 0;
+        }
+        
+        .nav-list a {
+            text-decoration: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            border-radius: 8px;
+            background-color: #34495e;
+            transition: background-color 0.3s ease, padding 0.3s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            font-size: 18px;
+            width: 90%;
+            margin: 0 auto;
+        }
+        
+        .nav-list a:hover {
+            background-color: #2980b9;
+        }
+        
+        .nav-list a .icon {
+            width: 30px;
+            height: 30px;
+            margin-right: 20px;
+            display: inline-block;
+            font-size: 24px;
+        }
+        
+        .nav-list a .text {
+            display: none;
+        }
+        
+        .sidebar.expanded .nav-list a {
+            padding: 15px 25px;
+            width: 100%; /* Remove the width restriction */
+        }
+        
+        .sidebar.expanded .nav-list a .text {
+            display: inline;
+        }
+        
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Updated styles for clock and date overlay */
+        .slideshow-section {
+            position: relative;
+            flex-grow: 1;
+            overflow: hidden;
+        }
 
-.search-bar input[type="submit"] {
-    background-color: #0f0;
-    color: #000;
-    border: none;
-    padding: 12px 24px;
-    margin-left: 10px;
-    border-radius: 24px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
+        .date-time-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+        }
 
-.search-bar input[type="submit"]:hover {
-    background-color: #00ff9d;
-}
+        .calendar-display {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
 
-.sidebar {
-    background-color: #1a1a1a;
-    width: 80px;
-    padding: 20px 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    overflow-y: auto;
-    transition: width 0.3s ease;
-    min-width: 80px;
-    flex-shrink: 0;
-    margin-top: 20px;
-}
+        .clock-display {
+            font-size: 24px;
+            font-weight: bold;
+        }
 
-.sidebar.expanded {
-    width: 300px;
-}
+        .slides {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            transition: transform 0.5s ease;
+        }
 
-.nav-list {
-    list-style: none;
-    padding: 0;
-    width: 100%;
-    flex-grow: 1;
-}
+        .slides > * {
+            flex: 0 0 100%;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;  /* This will cover the entire slide area */
+        }
+        
+        .weather-panel, .twitter-panel, .calendar-section {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 15px;
+            text-align: center;
+            color: white;
+        }
 
-.nav-list li {
-    margin: 15px 0;
-}
+        #calendar {
+            height: 100%;
+        }
+    /* Three image containers (use 25% for four, and 50% for two, etc) */
+    .column {
+        float: left;
+        width: 16.67%;
+        padding: 5px;
+    }
 
-.nav-list a {
-    text-decoration: none;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    padding: 15px 20px;
-    border-radius: 8px;
-    background-color: #2a2a2a;
-    transition: background-color 0.3s ease, padding 0.3s ease;
-    white-space: nowrap;
-    overflow: hidden;
-    font-size: 18px;
-    width: 90%;
-    margin: 0 auto;
-}
+    /* Clear floats after image containers */
+    .row::after {
+        content: "";
+        clear: both;
+        display: table;
+    }
+    /* Custom scrollbar styles */
+    .sidebar::-webkit-scrollbar {
+        width: 10px;
+        }
 
-.nav-list a:hover {
-    background-color: #0f0;
-    color: #000;
-}
+    .sidebar::-webkit-scrollbar-track {
+        background-color: #34495e;
+        border-radius: 10px;
+    }
 
-.nav-list a .icon {
-    width: 30px;
-    height: 30px;
-    margin-right: 20px;
-    display: inline-block;
-    font-size: 24px;
-}
+    .sidebar::-webkit-scrollbar-thumb {
+        background-color: #3cff00;
+        border-radius: 10px;
+        border: 2px solid #34495e;
+    }
 
-.nav-list a .text {
-    display: none;
-}
+    /* Toggle button styles */
+    #toggle-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+        background-color: #1eff00;
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
 
-.sidebar.expanded .nav-list a {
-    padding: 15px 25px;
-    width: 100%;
-}
+    #toggle-btn:hover {
+        background-color: #00f35d;
+    }
 
-.sidebar.expanded .nav-list a .text {
-    display: inline;
-}
 
-.main-content {
-    flex-grow: 1;
-    padding: 20px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-}
+        /* App Drawer Styles */
+        .app-drawer-toggle {
+            width: 60px;
+            height: 60px;
+            background-color: #f0f0f0;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
 
-.slideshow-section {
-    position: relative;
-    flex-grow: 1;
-    overflow: hidden;
-}
+        .app-drawer-toggle:hover {
+            background-color: #e0e0e0;
+        }
 
-.date-time-overlay {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    z-index: 10;
-    background: rgba(0, 0, 0, 0.5);
-    color: #0f0;
-    padding: 10px;
-    border-radius: 5px;
-    font-family: 'Roboto', sans-serif;
-}
+        .app-drawer {
+            position: fixed;
+            bottom: -300px; /* Start off-screen */
+            left: 0;
+            width: 100%;
+            height: 300px;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
+            transition: bottom 0.3s ease-in-out;
+            z-index: 999;
+            overflow-y: auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-content: flex-start;
+            padding: 20px;
+        }
 
-.calendar-display {
-    font-size: 18px;
-    margin-bottom: 5px;
-}
+        .app-drawer.open {
+            bottom: 80px; /* Height of the app dock */
+        }
 
-.clock-display {
-    font-size: 24px;
-    font-weight: bold;
-}
+        .drawer-app-icon {
+            width: 80px;
+            height: 80px;
+            margin: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
 
-.slides {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    transition: transform 0.5s ease;
-}
+        .drawer-app-icon img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            margin-bottom: 5px;
+        }
 
-.slides > * {
-    flex: 0 0 100%;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
+        .drawer-app-icon span {
+            font-size: 12px;
+            color: #333;
+        }
 
-.weather-panel, .twitter-panel, .calendar-section {
-    background: rgba(0, 0, 0, 0.6);
-    padding: 15px;
-    text-align: center;
-    color: #0f0;
-}
+        /* Ensure the app dock is above other elements but below the drawer */
+        .app-dock {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+        }
 
-#calendar {
-    height: 100%;
-}
+        .app-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 10px;
+            transition: transform 0.2s ease-in-out;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-.column {
-    float: left;
-    width: 16.67%;
-    padding: 5px;
-}
+        .app-icon img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 10px;
+        }
 
-.row::after {
-    content: "";
-    clear: both;
-    display: table;
-}
+        .app-icon:hover {
+            transform: scale(1.2);
+        }
 
-.sidebar::-webkit-scrollbar {
-    width: 10px;
-}
+        #backgroundImageInput {
+            display: none;
+        }
 
-.sidebar::-webkit-scrollbar-track {
-    background-color: #1a1a1a;
-    border-radius: 10px;
-}
+        .custom-file-upload {
+            border: 1px solid #ccc;
+            display: inline-block;
+            padding: 6px 12px;
+            cursor: pointer;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
 
-.sidebar::-webkit-scrollbar-thumb {
-    background-color: #0f0;
-    border-radius: 10px;
-    border: 2px solid #1a1a1a;
-}
-
-#toggle-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 1000;
-    background-color: #0f0;
-    color: #000;
-    border: none;
-    padding: 10px;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-#toggle-btn:hover {
-    background-color: #00ff9d;
-}
-
-.app-drawer-toggle {
-    width: 60px;
-    height: 60px;
-    background-color: #2a2a2a;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.app-drawer-toggle:hover {
-    background-color: #0f0;
-}
-
-.app-drawer {
-    position: fixed;
-    bottom: -300px;
-    left: 0;
-    width: 100%;
-    height: 300px;
-    background-color: rgba(26, 26, 26, 0.9);
-    box-shadow: 0px -2px 10px rgba(0, 255, 0, 0.1);
-    transition: bottom 0.3s ease-in-out;
-    z-index: 999;
-    overflow-y: auto;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-content: flex-start;
-    padding: 20px;
-}
-
-.app-drawer.open {
-    bottom: 80px;
-}
-
-.drawer-app-icon {
-    width: 80px;
-    height: 80px;
-    margin: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-}
-
-.drawer-app-icon img {
-    width: 50px;
-    height: 50px;
-    object-fit: contain;
-    margin-bottom: 5px;
-}
-
-.drawer-app-icon span {
-    font-size: 12px;
-    color: #0f0;
-}
-
-.app-dock {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: rgba(26, 26, 26, 0.8);
-    box-shadow: 0px -2px 10px rgba(0, 255, 0, 0.1);
-    padding: 10px;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    z-index: 1000;
-}
-
-.app-icon {
-    width: 60px;
-    height: 60px;
-    margin: 0 10px;
-    transition: transform 0.2s ease-in-out;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.app-icon img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    border-radius: 10px;
-}
-
-.app-icon:hover {
-    transform: scale(1.2);
-}
-
-#backgroundImageInput {
-    display: none;
-}
-
-.custom-file-upload {
-    border: 1px solid #0f0;
-    display: inline-block;
-    padding: 6px 12px;
-    cursor: pointer;
-    background-color: #1a1a1a;
-    border-radius: 4px;
-    transition: background-color 0.3s;
-    color: #0f0;
-}
-
-.custom-file-upload:hover {
-    background-color: #0f0;
-    color: #000;
-}
-/* The rest of the CSS remains the same */
-</style>
+        .custom-file-upload:hover {
+            background-color: #e9ecef;
+        }
+    </style>
 </head>
 <body>
     <!-- Status Bar -->
