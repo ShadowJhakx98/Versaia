@@ -56,10 +56,15 @@ document.addEventListener('DOMContentLoaded', () => {
     bootSequence.style.display = 'block';
     startupSound.play();
     
-    const messageInterval = setInterval(() => {
-      bootMessage.textContent = messages[messageIndex];
-      messageIndex = (messageIndex + 1) % messages.length;
-    }, 3000);
+    function displayNextMessage() {
+      if (messageIndex < messages.length) {
+        bootMessage.textContent = messages[messageIndex];
+        messageIndex++;
+        setTimeout(displayNextMessage, 3000);
+      }
+    }
+
+    displayNextMessage();
 
     // Simulate loading progress
     let progress = 0;
@@ -68,15 +73,13 @@ document.addEventListener('DOMContentLoaded', () => {
       loadingProgress.style.width = `${progress}%`;
       if (progress >= 100) {
         clearInterval(progressInterval);
-        clearInterval(messageInterval);
-        showLoginScreen();
+        setTimeout(showLoginScreen, 2000); // Wait for the last message to be displayed
       }
     }, 600); // 60 seconds total
 
     // If BIOS settings are not accessed, show login screen after 1 minute
     setTimeout(() => {
       if (!inBiosSettings) {
-        clearInterval(messageInterval);
         clearInterval(progressInterval);
         showLoginScreen();
       }
