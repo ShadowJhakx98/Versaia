@@ -571,7 +571,36 @@
             .slideshow-section {
                 height: 300px;
             }
+            .nav-list a, .app-icon, .notification-item, .custom-file-upload {
+                min-height: 44px;
+                min-width: 44px;
+                padding: 12px;
+            }
+
+            .app-dock {
+                padding: 10px 5px;
+            }
+
+            .app-icon {
+                margin: 0 5px;
+            }
+
+            /* Improve scrolling on touch devices */
+            .sidebar, .notification-list, .app-drawer {
+                -webkit-overflow-scrolling: touch;
+            }
+
+            /* Add visual feedback for touch interactions */
+            .nav-list a:active, .app-icon:active, .notification-item:active, .custom-file-upload:active {
+                background-color: rgba(0, 0, 0, 0.1);
+            }
         }
+
+        /* Add transition for smooth swiping */
+        .slideshow-section .slides {
+            transition: transform 0.3s ease-out;
+        }
+    }
     </style>
 </head>
 <body>
@@ -968,7 +997,102 @@
                 drawer.style.height = drawer.classList.contains('open') ? '100%' : '0';
             }
         }
+        // Add touch interaction handling
+        let touchStartX = 0;
+        let touchEndX = 0;
 
+        function handleTouchStart(event) {
+            touchStartX = event.touches[0].clientX;
+        }
+
+        function handleTouchMove(event) {
+            touchEndX = event.touches[0].clientX;
+        }
+
+        function handleTouchEnd() {
+            if (touchStartX - touchEndX > 75) {
+                // Swipe left
+                nextSlide();
+            }
+            if (touchEndX - touchStartX > 75) {
+                // Swipe right
+                prevSlide();
+            }
+            // Reset values
+            touchStartX = 0;
+            touchEndX = 0;
+        }
+
+        // Add swipe functionality to slideshow
+        const slideshowSection = document.querySelector('.slideshow-section');
+        slideshowSection.addEventListener('touchstart', handleTouchStart, false);
+        slideshowSection.addEventListener('touchmove', handleTouchMove, false);
+        slideshowSection.addEventListener('touchend', handleTouchEnd, false);
+
+        // Add previous slide function
+        function prevSlide() {
+            slideIndex = (slideIndex - 1 + totalSlides) % totalSlides;
+            showSlide(slideOrder[slideIndex]);
+            localStorage.setItem('lastSlideIndex', slideIndex);
+        }
+
+        // Modify toggleNotificationDrawer for touch devices
+        function toggleNotificationDrawer() {
+            const drawer = document.getElementById('notificationDrawer');
+            drawer.classList.toggle('open');
+            if (document.body.classList.contains('mobile')) {
+                drawer.style.height = drawer.classList.contains('open') ? '100%' : '0';
+                drawer.style.transition = 'height 0.3s ease-out';
+            }
+        }
+
+        // Add touch-friendly sidebar toggle
+        const sidebar = document.querySelector('.sidebar');
+        let touchStartY = 0;
+        let touchEndY = 0;
+
+        sidebar.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        }, false);
+
+        sidebar.addEventListener('touchmove', (e) => {
+            touchEndY = e.touches[0].clientY;
+        }, false);
+
+        sidebar.addEventListener('touchend', () => {
+            if (touchStartY - touchEndY > 50 && document.body.classList.contains('mobile')) {
+                // Swipe up to close sidebar
+                sidebar.classList.remove('expanded');
+            } else if (touchEndY - touchStartY > 50 && document.body.classList.contains('mobile')) {
+                // Swipe down to open sidebar
+                sidebar.classList.add('expanded');
+            }
+            // Reset values
+            touchStartY = 0;
+            touchEndY = 0;
+        }, false);
+
+        // Implement long press for app icons to show options
+        const appIcons = document.querySelectorAll('.app-icon');
+        let pressTimer;
+
+        appIcons.forEach(icon => {
+            icon.addEventListener('touchstart', (e) => {
+                pressTimer = setTimeout(() => {
+                    showAppOptions(e.target);
+                }, 500);
+            });
+
+            icon.addEventListener('touchend', () => {
+                clearTimeout(pressTimer);
+            });
+        });
+
+        function showAppOptions(appIcon) {
+            // Implement a context menu or action sheet for the app
+            alert(`Options for ${appIcon.alt || 'App'}`);
+            // In a real implementation, you'd show a custom menu with options
+        }
     // Slideshow functionality
     // Slideshow functionality
     const slides = document.querySelector('.slides');
