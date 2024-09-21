@@ -566,6 +566,113 @@
             line-height: 40px;
             color: #999;
         }
+        @keyframes pulseOutline {
+        0% {
+        box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(0, 123, 255, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(0, 123, 255, 0);
+    }
+}
+
+.widget {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    position: relative;
+    animation: pulseOutline 2s infinite;
+}
+
+.widget::after {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    border-radius: 12px;
+    border: 2px solid transparent;
+    background: linear-gradient(45deg, #007bff, #00bfff);
+    background-clip: padding-box;
+    z-index: -1;
+}
+
+.widget-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* YouTube Widget */
+.youtube-widget iframe {
+    width: 100%;
+    height: 315px;
+}
+
+/* Todo Widget */
+.todo-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.todo-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.todo-item input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+/* News Widget */
+.news-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.news-item {
+    margin-bottom: 10px;
+}
+
+/* Calculator Widget */
+.calculator {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+}
+
+.calculator button {
+    padding: 10px;
+    font-size: 18px;
+    border: none;
+    background-color: #f0f0f0;
+    cursor: pointer;
+}
+
+.calculator input {
+    grid-column: span 4;
+    padding: 10px;
+    font-size: 18px;
+    text-align: right;
+}
+
+/* Responsive layout for widgets */
+@media (min-width: 768px) {
+    .widget-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+}
+
     </style>
 </head>
 <body>
@@ -676,7 +783,75 @@
                     <div class="calendar-display" id="date-display"></div>
                     <div class="clock-display" id="clock-display"></div>
                 </div>
-
+                <div class="widget-container">
+                    <!-- YouTube Widget -->
+                    <div class="widget youtube-widget">
+                        <div class="widget-title">YouTube</div>
+                        <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allowfullscreen></iframe>
+                    </div>
+        
+                    <!-- Todo Widget -->
+                    <div class="widget todo-widget">
+                        <div class="widget-title">Todo List</div>
+                        <ul class="todo-list" id="todoList">
+                            <li class="todo-item">
+                                <input type="checkbox" id="todo1">
+                                <label for="todo1">Complete project</label>
+                            </li>
+                            <li class="todo-item">
+                                <input type="checkbox" id="todo2">
+                                <label for="todo2">Buy groceries</label>
+                            </li>
+                        </ul>
+                        <input type="text" id="newTodoInput" placeholder="Add new todo">
+                        <button onclick="addTodo()">Add</button>
+                    </div>
+        
+                    <!-- News Widget -->
+                    <div class="widget news-widget">
+                        <div class="widget-title">Latest News</div>
+                        <ul class="news-list" id="newsList">
+                            <!-- News items will be dynamically added here -->
+                        </ul>
+                    </div>
+        
+                    <!-- Calendar Widget -->
+                    <div class="widget calendar-widget">
+                        <div class="widget-title">Calendar</div>
+                        <div id="calendar"></div>
+                    </div>
+        
+                    <!-- Weather Widget -->
+                    <div class="widget weather-widget">
+                        <div class="widget-title">Weather</div>
+                        <div id="weatherInfo"></div>
+                    </div>
+        
+                    <!-- Calculator Widget -->
+                    <div class="widget calculator-widget">
+                        <div class="widget-title">Calculator</div>
+                        <div class="calculator">
+                            <input type="text" id="calcDisplay" readonly>
+                            <button onclick="appendToCalc('7')">7</button>
+                            <button onclick="appendToCalc('8')">8</button>
+                            <button onclick="appendToCalc('9')">9</button>
+                            <button onclick="appendToCalc('+')">+</button>
+                            <button onclick="appendToCalc('4')">4</button>
+                            <button onclick="appendToCalc('5')">5</button>
+                            <button onclick="appendToCalc('6')">6</button>
+                            <button onclick="appendToCalc('-')">-</button>
+                            <button onclick="appendToCalc('1')">1</button>
+                            <button onclick="appendToCalc('2')">2</button>
+                            <button onclick="appendToCalc('3')">3</button>
+                            <button onclick="appendToCalc('*')">*</button>
+                            <button onclick="appendToCalc('0')">0</button>
+                            <button onclick="appendToCalc('.')">.</button>
+                            <button onclick="calculateResult()">=</button>
+                            <button onclick="appendToCalc('/')">/</button>
+                            <button onclick="clearCalc()">C</button>
+                        </div>
+                    </div>
+                </div>
                     <div class="weather-panel">
                         <h3>Weather</h3>
                         <p id="weather-info">Fetching weather...</p>
@@ -1271,6 +1446,89 @@ async function getSuggestions(task) {
                 pullToRefreshElement.textContent = 'Release to refresh';
             }
         });
+        // Todo Widget Functionality
+        function addTodo() {
+            const input = document.getElementById('newTodoInput');
+            const todoList = document.getElementById('todoList');
+            if (input.value.trim() !== '') {
+                const li = document.createElement('li');
+                li.className = 'todo-item';
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = 'todo' + (todoList.children.length + 1);
+                const label = document.createElement('label');
+                label.htmlFor = checkbox.id;
+                label.textContent = input.value;
+                li.appendChild(checkbox);
+                li.appendChild(label);
+                todoList.appendChild(li);
+                input.value = '';
+            }
+        }
+
+        // News Widget Functionality
+        async function fetchNews() {
+            const apiKey = 'YOUR_NEWS_API_KEY'; // Replace with your actual API key
+            const response = await fetch(`https://newsapi.org/v2/top-headlines?country=us&apiKey=${apiKey}`);
+            const data = await response.json();
+            const newsList = document.getElementById('newsList');
+            newsList.innerHTML = '';
+            data.articles.slice(0, 5).forEach(article => {
+                const li = document.createElement('li');
+                li.className = 'news-item';
+                li.innerHTML = `<a href="${article.url}" target="_blank">${article.title}</a>`;
+                newsList.appendChild(li);
+            });
+        }
+
+        // Calendar Widget Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                height: 'auto',
+                events: [
+                    { title: 'Meeting', date: '2024-09-22' },
+                    { title: 'Birthday', date: '2024-09-25' }
+                ]
+            });
+            calendar.render();
+        });
+
+        // Weather Widget Functionality
+        async function fetchWeather() {
+            const apiKey = 'YOUR_WEATHER_API_KEY'; // Replace with your actual API key
+            const city = 'New York'; // Replace with desired city
+            const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`);
+            const data = await response.json();
+            document.getElementById('weatherInfo').innerHTML = `
+                <p>Temperature: ${data.main.temp}°C</p>
+                <p>Condition: ${data.weather[0].description}</p>
+            `;
+        }
+
+        // Calculator Widget Functionality
+        function appendToCalc(value) {
+            document.getElementById('calcDisplay').value += value;
+        }
+
+        function clearCalc() {
+            document.getElementById('calcDisplay').value = '';
+        }
+
+        function calculateResult() {
+            try {
+                document.getElementById('calcDisplay').value = eval(document.getElementById('calcDisplay').value);
+            } catch (error) {
+                document.getElementById('calcDisplay').value = 'Error';
+            }
+        }
+
+        // Initialize widgets
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchNews();
+            fetchWeather();
+        });
 
         document.addEventListener('touchend', (e) => {
             const pullEndY = e.changedTouches[0].clientY;
@@ -1292,22 +1550,6 @@ async function getSuggestions(task) {
         window.addEventListener('resize', () => {
             applyMobileLayout();
         });
-        // Enable scrolling for mobile
-        function enableMobileScrolling() {
-            if (window.innerWidth <= 768) {
-                document.body.style.overflowY = 'auto';
-                document.querySelector('.dashboard-container').style.height = 'auto';
-                document.querySelector('.dashboard-container').style.minHeight = '100vh';
-                document.querySelector('.main-content').style.overflowY = 'visible';
-            } else {
-                document.body.style.overflowY = 'hidden';
-                document.querySelector('.dashboard-container').style.height = '100%';
-                document.querySelector('.main-content').style.overflowY = 'auto';
-            }
-        }
-
-        window.addEventListener('load', enableMobileScrolling);
-        window.addEventListener('resize', enableMobileScrolling);
 
     </script>
     <script>
