@@ -149,7 +149,6 @@
             background-color: #1f1f1f;
             width: 100%;
             height: 100%;
-            overflow: hidden;
             flex-direction: column;
             justify-content: space-between;
 
@@ -285,7 +284,7 @@
         .main-content {
             flex-grow: 1;
             padding: 20px;
-            overflow: hidden;
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
         }
@@ -1549,13 +1548,7 @@ async function getSuggestions(task) {
         window.addEventListener('resize', () => {
             applyMobileLayout();
         });
-        // Enable scrolling for mobile
-        function enableMobileScrolling() {
-                document.body.style.overflowY = 'auto';
-                document.querySelector('.dashboard-container').style.height = 'auto';
-                document.querySelector('.dashboard-container').style.minHeight = '100vh';
-                document.querySelector('.main-content').style.overflowY = 'visible';
-            }
+
         
     </script>
     <script>
