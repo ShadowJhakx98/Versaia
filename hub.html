@@ -524,6 +524,48 @@
         .custom-file-upload:hover {
             background-color: #e9ecef;
         }
+                /* Mobile-specific styles */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+            }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+            .app-dock {
+                flex-wrap: wrap;
+            }
+        }
+
+        /* Context menu styles */
+        .context-menu {
+            position: fixed;
+            background: white;
+            border: 1px solid #ccc;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        .context-menu-item {
+            padding: 10px;
+            cursor: pointer;
+        }
+        .context-menu-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        /* Pull-to-refresh styles */
+        .pull-to-refresh {
+            text-align: center;
+            height: 40px;
+            line-height: 40px;
+            color: #999;
+        }
     </style>
 </head>
 <body>
@@ -1148,7 +1190,107 @@ async function getSuggestions(task) {
             taskSuggestions.displaySuggestions(taskInput.value);
         });
     });
+        // Mobile detection
+        function isMobile() {
+            return window.innerWidth <= 768;
+        }
 
+        // Apply mobile layout
+        function applyMobileLayout() {
+            if (isMobile()) {
+                document.body.classList.add('mobile');
+                // Additional mobile-specific adjustments
+            } else {
+                document.body.classList.remove('mobile');
+                // Revert to desktop layout
+            }
+        }
+
+        // Context menu functionality
+        let contextMenu = null;
+
+        function showContextMenu(e, appIcon) {
+            e.preventDefault();
+            if (contextMenu) {
+                document.body.removeChild(contextMenu);
+            }
+            contextMenu = document.createElement('div');
+            contextMenu.className = 'context-menu';
+            contextMenu.innerHTML = `
+                <div class="context-menu-item" onclick="openApp('${appIcon.dataset.appUrl}')">Open</div>
+                <div class="context-menu-item" onclick="removeApp('${appIcon.id}')">Remove</div>
+            `;
+            contextMenu.style.left = `${e.clientX}px`;
+            contextMenu.style.top = `${e.clientY}px`;
+            document.body.appendChild(contextMenu);
+        }
+
+        function hideContextMenu() {
+            if (contextMenu) {
+                document.body.removeChild(contextMenu);
+                contextMenu = null;
+            }
+        }
+
+        // Attach long-press event to app icons
+        const appIcons = document.querySelectorAll('.app-icon');
+        appIcons.forEach(icon => {
+            let pressTimer;
+            icon.addEventListener('touchstart', (e) => {
+                pressTimer = setTimeout(() => showContextMenu(e, icon), 500);
+            });
+            icon.addEventListener('touchend', () => {
+                clearTimeout(pressTimer);
+            });
+        });
+
+        // Hide context menu when clicking outside
+        document.addEventListener('click', hideContextMenu);
+
+        // Pull-to-refresh functionality
+        let pullStartY = 0;
+        const pullThreshold = 60;
+        const pullToRefreshElement = document.createElement('div');
+        pullToRefreshElement.className = 'pull-to-refresh';
+        pullToRefreshElement.textContent = 'Pull to refresh';
+        document.body.insertBefore(pullToRefreshElement, document.body.firstChild);
+
+        document.addEventListener('touchstart', (e) => {
+            pullStartY = e.touches[0].clientY;
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            const pullMoveY = e.touches[0].clientY;
+            const pullDistance = pullMoveY - pullStartY;
+
+            if (pullDistance > 0 && pullDistance < pullThreshold) {
+                pullToRefreshElement.textContent = 'Pull to refresh';
+                pullToRefreshElement.style.height = `${pullDistance}px`;
+            } else if (pullDistance >= pullThreshold) {
+                pullToRefreshElement.textContent = 'Release to refresh';
+            }
+        });
+
+        document.addEventListener('touchend', (e) => {
+            const pullEndY = e.changedTouches[0].clientY;
+            const pullDistance = pullEndY - pullStartY;
+
+            if (pullDistance >= pullThreshold) {
+                // Perform refresh action
+                location.reload();
+            }
+
+            pullToRefreshElement.style.height = '0px';
+        });
+
+        // Initialize mobile detection and layout
+        window.addEventListener('load', () => {
+            applyMobileLayout();
+        });
+
+        window.addEventListener('resize', () => {
+            applyMobileLayout();
+        });
 
     </script>   
     <script>
