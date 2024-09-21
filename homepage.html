@@ -538,6 +538,7 @@
         .custom-file-upload:hover {
             background-color: #e9ecef;
         }
+        
         /* Add responsive styles */
         @media screen and (max-width: 768px) {
             .dashboard-container {
@@ -599,6 +600,50 @@
         /* Add transition for smooth swiping */
         .slideshow-section .slides {
             transition: transform 0.3s ease-out;
+        }
+        /* Custom Context Menu Styles */
+        .context-menu {
+            position: fixed;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1000;
+        }
+
+        .context-menu-item {
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+
+        .context-menu-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        /* Pull-to-refresh Styles */
+        .pull-to-refresh {
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Mobile Scrolling Styles */
+        @media screen and (max-width: 768px) {
+            body {
+                overflow-y: auto;
+            }
+
+            .dashboard-container {
+                height: auto;
+                min-height: 100vh;
+            }
+
+            .main-content {
+                overflow-y: visible;
+            }
         }
     }
     </style>
@@ -971,128 +1016,139 @@
         }
         </script>
     <script>
-                // Add mobile detection and responsive behavior
-        function checkMobile() {
-            const mobileBreakpoint = 768;
-            if (window.innerWidth <= mobileBreakpoint) {
-                document.body.classList.add('mobile');
-                // Additional mobile-specific adjustments
-                document.querySelector('.sidebar').classList.remove('expanded');
-                document.getElementById('toggle-btn').style.display = 'none';
-            } else {
-                document.body.classList.remove('mobile');
-                document.getElementById('toggle-btn').style.display = 'block';
-            }
+        // Custom Context Menu
+        function showContextMenu(x, y, appIcon) {
+            const contextMenu = document.createElement('div');
+            contextMenu.className = 'context-menu';
+            contextMenu.style.left = `${x}px`;
+            contextMenu.style.top = `${y}px`;
+
+            const menuItems = [
+                { text: 'Open', action: () => openApp(appIcon.querySelector('a').href) },
+                { text: 'Remove', action: () => removeApp(appIcon) },
+                { text: 'Info', action: () => showAppInfo(appIcon) }
+            ];
+
+            menuItems.forEach(item => {
+                const menuItem = document.createElement('div');
+                menuItem.className = 'context-menu-item';
+                menuItem.textContent = item.text;
+                menuItem.onclick = () => {
+                    item.action();
+                    contextMenu.remove();
+                };
+                contextMenu.appendChild(menuItem);
+            });
+
+            document.body.appendChild(contextMenu);
+            contextMenu.style.display = 'block';
+
+            document.addEventListener('click', () => contextMenu.remove(), { once: true });
         }
 
-        // Run on page load and window resize
-        window.addEventListener('load', checkMobile);
-        window.addEventListener('resize', checkMobile);
-
-        // Modify existing functions to be responsive
-        function toggleNotificationDrawer() {
-            const drawer = document.getElementById('notificationDrawer');
-            drawer.classList.toggle('open');
-            if (document.body.classList.contains('mobile')) {
-                drawer.style.height = drawer.classList.contains('open') ? '100%' : '0';
-            }
-        }
-        // Add touch interaction handling
-        let touchStartX = 0;
-        let touchEndX = 0;
-
-        function handleTouchStart(event) {
-            touchStartX = event.touches[0].clientX;
+        function openApp(url) {
+            window.location.href = url;
         }
 
-        function handleTouchMove(event) {
-            touchEndX = event.touches[0].clientX;
+        function removeApp(appIcon) {
+            appIcon.remove();
+            // Additional logic to persist this change
         }
 
-        function handleTouchEnd() {
-            if (touchStartX - touchEndX > 75) {
-                // Swipe left
-                nextSlide();
-            }
-            if (touchEndX - touchStartX > 75) {
-                // Swipe right
-                prevSlide();
-            }
-            // Reset values
-            touchStartX = 0;
-            touchEndX = 0;
+        function showAppInfo(appIcon) {
+            const appName = appIcon.querySelector('img').alt;
+            alert(`App Info: ${appName}`);
+            // In a real implementation, you'd show more detailed information
         }
 
-        // Add swipe functionality to slideshow
-        const slideshowSection = document.querySelector('.slideshow-section');
-        slideshowSection.addEventListener('touchstart', handleTouchStart, false);
-        slideshowSection.addEventListener('touchmove', handleTouchMove, false);
-        slideshowSection.addEventListener('touchend', handleTouchEnd, false);
-
-        // Add previous slide function
-        function prevSlide() {
-            slideIndex = (slideIndex - 1 + totalSlides) % totalSlides;
-            showSlide(slideOrder[slideIndex]);
-            localStorage.setItem('lastSlideIndex', slideIndex);
-        }
-
-        // Modify toggleNotificationDrawer for touch devices
-        function toggleNotificationDrawer() {
-            const drawer = document.getElementById('notificationDrawer');
-            drawer.classList.toggle('open');
-            if (document.body.classList.contains('mobile')) {
-                drawer.style.height = drawer.classList.contains('open') ? '100%' : '0';
-                drawer.style.transition = 'height 0.3s ease-out';
-            }
-        }
-
-        // Add touch-friendly sidebar toggle
-        const sidebar = document.querySelector('.sidebar');
-        let touchStartY = 0;
-        let touchEndY = 0;
-
-        sidebar.addEventListener('touchstart', (e) => {
-            touchStartY = e.touches[0].clientY;
-        }, false);
-
-        sidebar.addEventListener('touchmove', (e) => {
-            touchEndY = e.touches[0].clientY;
-        }, false);
-
-        sidebar.addEventListener('touchend', () => {
-            if (touchStartY - touchEndY > 50 && document.body.classList.contains('mobile')) {
-                // Swipe up to close sidebar
-                sidebar.classList.remove('expanded');
-            } else if (touchEndY - touchStartY > 50 && document.body.classList.contains('mobile')) {
-                // Swipe down to open sidebar
-                sidebar.classList.add('expanded');
-            }
-            // Reset values
-            touchStartY = 0;
-            touchEndY = 0;
-        }, false);
-
-        // Implement long press for app icons to show options
+        // Implement long press for app icons
         const appIcons = document.querySelectorAll('.app-icon');
         let pressTimer;
+        let longPressThreshold = 500; // ms
 
         appIcons.forEach(icon => {
             icon.addEventListener('touchstart', (e) => {
                 pressTimer = setTimeout(() => {
-                    showAppOptions(e.target);
-                }, 500);
+                    const rect = icon.getBoundingClientRect();
+                    showContextMenu(rect.left, rect.bottom, icon);
+                }, longPressThreshold);
             });
 
             icon.addEventListener('touchend', () => {
                 clearTimeout(pressTimer);
             });
+
+            icon.addEventListener('touchmove', () => {
+                clearTimeout(pressTimer);
+            });
         });
 
-        function showAppOptions(appIcon) {
-            // Implement a context menu or action sheet for the app
-            alert(`Options for ${appIcon.alt || 'App'}`);
-            // In a real implementation, you'd show a custom menu with options
+        // Pull-to-refresh functionality
+        let touchStartY = 0;
+        let pullStarted = false;
+        const pullThreshold = 60; // pixels
+
+        function addPullToRefreshElement() {
+            const ptr = document.createElement('div');
+            ptr.className = 'pull-to-refresh';
+            ptr.textContent = 'Pull to refresh';
+            document.body.insertBefore(ptr, document.body.firstChild);
+            return ptr;
         }
+
+        const ptrElement = addPullToRefreshElement();
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            const touchY = e.touches[0].clientY;
+            const pull = touchY - touchStartY;
+
+            if (pull > 0 && window.scrollY === 0 && !pullStarted) {
+                pullStarted = true;
+                ptrElement.style.transform = `translateY(${pull}px)`;
+                
+                if (pull > pullThreshold) {
+                    ptrElement.textContent = 'Release to refresh';
+                } else {
+                    ptrElement.textContent = 'Pull to refresh';
+                }
+            }
+        });
+
+        document.addEventListener('touchend', () => {
+            if (pullStarted) {
+                pullStarted = false;
+                ptrElement.style.transform = 'translateY(0)';
+                
+                if (parseInt(ptrElement.style.transform.replace('translateY(', '')) > pullThreshold) {
+                    ptrElement.textContent = 'Refreshing...';
+                    // Perform refresh action here
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                }
+            }
+        });
+
+        // Enable scrolling for mobile
+        function enableMobileScrolling() {
+            if (window.innerWidth <= 768) {
+                document.body.style.overflowY = 'auto';
+                document.querySelector('.dashboard-container').style.height = 'auto';
+                document.querySelector('.dashboard-container').style.minHeight = '100vh';
+                document.querySelector('.main-content').style.overflowY = 'visible';
+            } else {
+                document.body.style.overflowY = 'hidden';
+                document.querySelector('.dashboard-container').style.height = '100%';
+                document.querySelector('.main-content').style.overflowY = 'auto';
+            }
+        }
+
+        window.addEventListener('load', enableMobileScrolling);
+        window.addEventListener('resize', enableMobileScrolling);
     </script>
     <script>
     // Slideshow functionality
