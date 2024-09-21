@@ -982,7 +982,7 @@ recognition.addEventListener('result', async (event) => {
         const response = await fetch('https://shadowjhakx98.pythonanywhere.com/search2', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ speech: transcript })
+            body: JSON.stringify({ query: transcript })
         });
         const data = await response.json();
         console.log('AI response:', data.response);
