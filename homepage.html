@@ -538,6 +538,40 @@
         .custom-file-upload:hover {
             background-color: #e9ecef;
         }
+        /* Add responsive styles */
+        @media screen and (max-width: 768px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .app-dock {
+                flex-wrap: wrap;
+            }
+
+            .app-icon {
+                width: 50px;
+                height: 50px;
+            }
+
+            .search-bar input[type="text"] {
+                width: 100%;
+            }
+
+            .slideshow-section {
+                height: 300px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -908,6 +942,33 @@
         }
         </script>
     <script>
+        // Add mobile detection and responsive behavior
+        function checkMobile() {
+            const mobileBreakpoint = 768;
+            if (window.innerWidth <= mobileBreakpoint) {
+                document.body.classList.add('mobile');
+                // Additional mobile-specific adjustments
+                document.querySelector('.sidebar').classList.remove('expanded');
+                document.getElementById('toggle-btn').style.display = 'none';
+            } else {
+                document.body.classList.remove('mobile');
+                document.getElementById('toggle-btn').style.display = 'block';
+            }
+        }
+
+        // Run on page load and window resize
+        window.addEventListener('load', checkMobile);
+        window.addEventListener('resize', checkMobile);
+
+        // Modify existing functions to be responsive
+        function toggleNotificationDrawer() {
+            const drawer = document.getElementById('notificationDrawer');
+            drawer.classList.toggle('open');
+            if (document.body.classList.contains('mobile')) {
+                drawer.style.height = drawer.classList.contains('open') ? '100%' : '0';
+            }
+        }
+
     // Slideshow functionality
     // Slideshow functionality
     const slides = document.querySelector('.slides');
