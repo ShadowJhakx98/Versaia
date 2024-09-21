@@ -1292,6 +1292,22 @@ async function getSuggestions(task) {
         window.addEventListener('resize', () => {
             applyMobileLayout();
         });
+        // Enable scrolling for mobile
+        function enableMobileScrolling() {
+            if (window.innerWidth <= 768) {
+                document.body.style.overflowY = 'auto';
+                document.querySelector('.dashboard-container').style.height = 'auto';
+                document.querySelector('.dashboard-container').style.minHeight = '100vh';
+                document.querySelector('.main-content').style.overflowY = 'visible';
+            } else {
+                document.body.style.overflowY = 'hidden';
+                document.querySelector('.dashboard-container').style.height = '100%';
+                document.querySelector('.main-content').style.overflowY = 'auto';
+            }
+        }
+
+        window.addEventListener('load', enableMobileScrolling);
+        window.addEventListener('resize', enableMobileScrolling);
 
     </script>
     <script>
