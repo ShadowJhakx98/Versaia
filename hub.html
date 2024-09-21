@@ -915,61 +915,6 @@
                 
                 <script>
                 // Voice Recognition
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-const recognition = new SpeechRecognition();
-recognition.interimResults = false;
-recognition.lang = 'en-US';
-
-const voiceIcon = document.getElementById('voice-icon');
-let audioContext;
-let startSound, recognitionSound, stopSound;
-
-function initializeAudio() {
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    
-    function loadSound(url) {
-        return fetch(url)
-            .then(response => response.arrayBuffer())
-            .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer));
-    }
-
-    return Promise.all([
-        loadSound("https://shadowjhakx98.github.io/Versaia/sounds/start-sound.mp3"),
-        loadSound("https://shadowjhakx98.github.io/Versaia/sounds/recognition-sound.mp3"),
-        loadSound("https://shadowjhakx98.github.io/Versaia/sounds/stop-sound.mp3")
-    ]).then(([start, recognition, stop]) => {
-        startSound = start;
-        recognitionSound = recognition;
-        stopSound = stop;
-    });
-}
-
-function playSound(audioBuffer) {
-    if (audioContext.state === 'suspended') {
-        audioContext.resume();
-    }
-    const source = audioContext.createBufferSource();
-    source.buffer = audioBuffer;
-    source.connect(audioContext.destination);
-    source.start(0);
-}
-
-voiceIcon.addEventListener('click', async () => {
-    if (!audioContext) {
-        try {
-            await initializeAudio();
-        } catch (error) {
-            console.error('Failed to initialize audio:', error);
-            alert('Failed to initialize audio. Voice recognition may not work properly.');
-        }
-    }
-
-    if (audioContext) {
-        playSound(startSound);
-        recognition.start();
-    }
-});
-
 recognition.addEventListener('result', async (event) => {
     const transcript = event.results[0][0].transcript;
     console.log('User said:', transcript);
@@ -979,39 +924,33 @@ recognition.addEventListener('result', async (event) => {
     }
 
     try {
-        const response = await fetch('https://shadowjhakx98.pythonanywhere.com/search2', {
+        const response = await fetch('https://shadowjhakx98.pythonanywhere.com/search', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ query: transcript })
         });
         const data = await response.json();
-        console.log('AI response:', data.response);
+        
+        if (data.result) {
+            console.log('AI response:', data.result);
 
-        const synth = window.speechSynthesis;
-        const utterance = new SpeechSynthesisUtterance(data.response);
-        synth.speak(utterance);
+            const synth = window.speechSynthesis;
+            const utterance = new SpeechSynthesisUtterance(data.result);
+            synth.speak(utterance);
+
+            // Optionally, you can display the response on the website
+            // Assuming you have an element with id 'ai-response' to display the text
+            const responseElement = document.getElementById('ai-response');
+            if (responseElement) {
+                responseElement.textContent = data.result;
+            }
+        } else if (data.error) {
+            console.error('Error from server:', data.error);
+            // Optionally, display the error on the website
+        }
     } catch (error) {
         console.error('Error processing speech:', error);
     }
-});
-
-recognition.addEventListener('end', () => {
-    if (audioContext) {
-        playSound(stopSound);
-    }
-    console.log('Speech recognition ended.');
-});
-
-// Add this to your DOMContentLoaded event listener
-document.addEventListener('DOMContentLoaded', () => {
-    // ... (other initialization code)
-
-    // Initialize voice recognition
-    voiceIcon.addEventListener('click', () => {
-        if (audioContext && audioContext.state === 'suspended') {
-            audioContext.resume();
-        }
-    });
 });
                 </script>
                 <div class="app-icon recent-app">
