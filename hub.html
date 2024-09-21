@@ -1565,6 +1565,31 @@ async function getSuggestions(task) {
         }
         </script>
     <script>
+// Set the inactivity timeout in milliseconds (15 minutes = 15 * 60 * 1000)
+const inactivityTimeout = 15 * 60 * 1000;
+
+let inactivityTimer;
+
+// Function to reset the timer
+function resetInactivityTimer() {
+    clearTimeout(inactivityTimer);
+    inactivityTimer = setTimeout(redirectUser, inactivityTimeout);
+}
+
+// Function to redirect the user
+function redirectUser() {
+    window.location.href = 'https://shadowjhakx98.github.io/Versaia/homepage.html';
+}
+
+// Add event listeners for user activity
+['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(eventName => {
+    document.addEventListener(eventName, resetInactivityTimer, true);
+});
+
+// Start the initial timer
+resetInactivityTimer();
+    </script>
+    <script>
         import * as React from 'react';
         import { Button, TextField } from '@mui/material';
 
