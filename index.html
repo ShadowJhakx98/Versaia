@@ -282,12 +282,13 @@
                 <p id="boot-message">System Initializing...</p>
             </div>
         </div>
-    </div>
-
-    <div id="login-screen" style="display: none;">
+            <div id="login-screen" style="display: none;">
         <h2>Welcome to VERSAIA OS</h2>
         <div id="auth-root"></div>
     </div>
+    </div>
+
+
 
     <!-- Audio elements and script remain unchanged -->
 
@@ -595,8 +596,7 @@ runBootSequence()
             </div>
         );
     };
-
-    export default AuthenticationSystem;
+     ReactDOM.render(<AuthenticationSystem />, document.getElementById('auth-root'));
    </script>
 </body>
 </html>
