@@ -303,8 +303,7 @@
     <audio id="startup-sound" preload="auto">
         <source src="https://shadowjhakx98.github.io/Versaia/sounds/boot-sound.mp3" type="audio/mpeg">
     </audio>
-
-    <script type="text/babel">
+   <script type="text/babel">
         const { useState } = React;
         const { User, Lock, Key, Fingerprint, Calendar, MapPin, Image } = lucide;
 
@@ -465,7 +464,9 @@
         );
     };
 
-export default AuthenticationSystem;
+    export default AuthenticationSystem;
+   </script>
+<script>
 document.addEventListener('DOMContentLoaded', () => {
     const bootScreen = document.getElementById('boot-screen');
     const versaiaLogo = document.getElementById('versaia-logo');
