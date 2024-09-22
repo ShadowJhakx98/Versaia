@@ -950,98 +950,11 @@
                     </a>
                 </div>
                 <div class="app-icon" id="voice-icon">
+                    <a href="https://shadowjhakx98.pythonanywhere.com/">
                     <img src="https://shadowjhakx98.github.io/Versaia/icons/Versaia.webp" alt="Versaia AI" style="border-radius: 50%">
+                    </a>
                 </div>
-                <script
-// Replace with your Home Assistant URL and Long-Lived Access Token
-const homeAssistantURL = 'https://tvw6kto6c72jphxpnexg3kympl3wxnj2.ui.nabu.casa';
-const accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI2MWFkNmIwN2I1YTQ0OWJkOWI3YTQ1MTE0MzExZDg4OCIsImlhdCI6MTcyNjk1ODYwMiwiZXhwIjoyMDQyMzE4NjAyfQ.mayf8hzdxJ1lEMgAcAEJtZdk1ZzNopceBREFzRvDt1Y';
 
-// Function to turn light on/off
-function toggleLight(action) {
-    const lightEntity = document.getElementById("lightSelector").value;
-    const url = `${homeAssistantURL}/api/services/light/turn_${action}`;
-    
-    fetch(url, {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ entity_id: lightEntity }),
-    }).then(response => {
-        if (response.ok) {
-            alert(`Light ${action} successfully!`);
-        } else {
-            alert(`Failed to ${action} light.`);
-        }
-    });
-}
-
-// Function to adjust light brightness
-function adjustBrightness(brightness) {
-    const lightEntity = document.getElementById("lightSelector").value;
-    const url = `${homeAssistantURL}/api/services/light/turn_on`;
-    
-    fetch(url, {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            entity_id: lightEntity,
-            brightness: parseInt(brightness),
-        }),
-    }).then(response => {
-        if (response.ok) {
-            alert('Brightness adjusted successfully!');
-        } else {
-            alert('Failed to adjust brightness.');
-        }
-    });
-}
-
-// Function to get sensor status
-function updateSensorStatus() {
-    fetch(`${homeAssistantURL}/api/states`, {
-        headers: {
-            'Authorization': `Bearer ${accessToken}`,
-        },
-    })
-    .then(response => response.json())
-    .then(data => {
-        const tempLivingRoom = data.find(state => state.entity_id === 'sensor.living_room_temperature').state;
-        const humidityBedroom = data.find(state => state.entity_id === 'sensor.bedroom_humidity').state;
-        const motionSensor = data.find(state => state.entity_id === 'binary_sensor.motion_sensor').state;
-
-        document.getElementById('tempLivingRoom').innerText = tempLivingRoom;
-        document.getElementById('humidityBedroom').innerText = humidityBedroom;
-        document.getElementById('motionSensor').innerText = motionSensor === 'on' ? 'Detected' : 'No Motion';
-    });
-}
-
-// Function to activate a scene
-function activateScene() {
-    const sceneEntity = document.getElementById("sceneSelector").value;
-    const url = `${homeAssistantURL}/api/services/scene/turn_on`;
-
-    fetch(url, {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ entity_id: sceneEntity }),
-    }).then(response => {
-        if (response.ok) {
-            alert('Scene activated successfully!');
-        } else {
-            alert('Failed to activate scene.');
-        }
-    });
-}
-                </script>
                 <script>
                 // Voice Recognition
 recognition.addEventListener('result', async (event) => {
