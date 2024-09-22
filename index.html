@@ -314,117 +314,158 @@
             const [profilePhoto, setProfilePhoto] = useState('/api/placeholder/150/150');
             const [email, setEmail] = useState('');
             const [password, setPassword] = useState('');
-
-            const handleSubmit = (e) => {
+            const [fullName, setFullName] = useState('');
+            const [birthdate, setBirthdate] = useState('');
+            const [gender, setGender] = useState('');
+            const [address, setAddress] = useState('');
+            const [bio, setBio] = useState('');
+            
+            const handleSubmit = async (e) => {
                 e.preventDefault();
                 console.log('Form submitted');
-                   try {
-                        const response = await fetch('/login', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ email, password }),
-                        });
 
-                        if (response.ok) {
-                            // Login successful
-                            document.getElementById('login-screen').style.display = 'none';
-                            window.location.href = 'https://shadowjhakx98.github.io/Versaia/homepage.html';
-                        } else {
-                            // Login failed
-                            const errorData = await response.json();
-                            alert(errorData.error || 'Login failed. Please try again.');
-                        }
-                    } catch (error) {
-                        console.error('Login error:', error);
-                        alert('An error occurred. Please try again later.');
+                const url = isLogin ? '/login' : '/register';
+                const data = isLogin 
+                    ? { email, password }
+                    : { email, password, fullName, birthdate, gender, address, bio };
+
+                try {
+                    const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    alert(result.message);
+                    if (!isLogin) {
+                         setIsLogin(true); // Switch to login view after successful signup
+                    } else {
+                        document.getElementById('login-screen').style.display = 'none';
+                        window.location.href = 'https://shadowjhakx98.github.io/Versaia/homepage.html';
                     }
-                };
-            const handleFileChange = (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                        setProfilePhoto(reader.result);
-                    };
-                    reader.readAsDataURL(file);
+                } else {
+                    const errorData = await response.json();
+                    alert(errorData.error || 'Operation failed. Please try again.');
                 }
-            };
-
-            return (
-                <div className="auth-system">
-                    <h2>{isLogin ? 'Login' : 'Sign Up'}</h2>
-                    <form onSubmit={handleSubmit}>
-                        {/* Authentication method tabs */}
-                        <div>
-                            <button type="button" onClick={() => setAuthMethod('password')}><Lock size={16} /></button>
-                            <button type="button" onClick={() => setAuthMethod('pin')}><Key size={16} /></button>
-                            <button type="button" onClick={() => setAuthMethod('passkey')}><Fingerprint size={16} /></button>
-                            <button type="button" onClick={() => setAuthMethod('windows')}><User size={16} /></button>
-                        </div>
-
-                        {/* Authentication fields based on selected method */}
-                        {authMethod === 'password' && (
-                            <>
-                                <input 
-                                    type="email" 
-                                    placeholder="Email" 
-                                    required 
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                />
-                                <input 
-                                    type="password" 
-                                    placeholder="Password" 
-                                    required 
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                />
-                            </>
-                        )}
-                        {authMethod === 'pin' && (
-                            <input type="password" placeholder="PIN" maxLength={4} required />
-                        )}
-                        {authMethod === 'passkey' && (
-                            <button type="button">Use Passkey</button>
-                        )}
-                        {authMethod === 'windows' && (
-                            <button type="button">Use Windows Hello</button>
-                        )}
-
-                        {/* Additional fields for sign up */}
-                        {!isLogin && (
-                            <>
-                                <input type="text" placeholder="Full Name" required />
-                                <input type="date" required />
-                                <select required>
-                                    <option value="">Select gender</option>
-                                    <option value="male">Male</option>
-                                    <option value="female">Female</option>
-                                    <option value="other">Other</option>
-                                    <option value="prefer-not-to-say">Prefer not to say</option>
-                                </select>
-                                <input type="text" placeholder="Address" required />
-                                <input type="text" placeholder="Tell us about yourself" />
-                                <div>
-                                    <img src={profilePhoto} alt="Profile" style={{width: '50px', height: '50px', borderRadius: '50%'}} />
-                                    <input type="file" onChange={handleFileChange} accept="image/*" />
-                                </div>
-                            </>
-                        )}
-
-                        <button type="submit">{isLogin ? 'Login' : 'Sign Up'}</button>
-                    </form>
-                    <button onClick={() => setIsLogin(!isLogin)}>
-                        {isLogin ? 'Need an account?' : 'Already have an account?'}
-                    </button>
-                </div>
-            );
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again later.');
+            }
         };
 
-        // Render the AuthenticationSystem component
-ReactDOM.render(<AuthenticationSystem />, document.getElementById('auth-root'));
+        const handleFileChange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    setProfilePhoto(reader.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        return (
+            <div className="auth-system">
+                <h2>{isLogin ? 'Login' : 'Sign Up'}</h2>
+                <form onSubmit={handleSubmit}>
+                    {/* Authentication method tabs */}
+                    <div>
+                        <button type="button" onClick={() => setAuthMethod('password')}><Lock size={16} /></button>
+                        <button type="button" onClick={() => setAuthMethod('pin')}><Key size={16} /></button>
+                        <button type="button" onClick={() => setAuthMethod('passkey')}><Fingerprint size={16} /></button>
+                        <button type="button" onClick={() => setAuthMethod('windows')}><User size={16} /></button>
+                    </div>
+
+                    {/* Authentication fields based on selected method */}
+                    {authMethod === 'password' && (
+                        <>
+                            <input 
+                                type="email" 
+                                placeholder="Email" 
+                                required 
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                            />
+                            <input 
+                                type="password" 
+                                placeholder="Password" 
+                                required 
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
+                        </>
+                    )}
+                    {authMethod === 'pin' && (
+                        <input type="password" placeholder="PIN" maxLength={4} required />
+                    )}
+                    {authMethod === 'passkey' && (
+                        <button type="button">Use Passkey</button>
+                    )}
+                    {authMethod === 'windows' && (
+                        <button type="button">Use Windows Hello</button>
+                    )}
+
+                    {/* Additional fields for sign up */}
+                    {!isLogin && (
+                        <>
+                            <input 
+                                type="text" 
+                                placeholder="Full Name" 
+                                required 
+                                value={fullName}
+                                onChange={(e) => setFullName(e.target.value)}
+                            />
+                            <input 
+                                type="date" 
+                                required 
+                                value={birthdate}
+                                onChange={(e) => setBirthdate(e.target.value)}
+                            />
+                            <select 
+                                required
+                                value={gender}
+                                onChange={(e) => setGender(e.target.value)}
+                            >
+                                <option value="">Select gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                                <option value="prefer-not-to-say">Prefer not to say</option>
+                            </select>
+                            <input 
+                                type="text" 
+                                placeholder="Address" 
+                                required 
+                                value={address}
+                                onChange={(e) => setAddress(e.target.value)}
+                            />
+                            <input 
+                                type="text" 
+                                placeholder="Tell us about yourself" 
+                                value={bio}
+                                onChange={(e) => setBio(e.target.value)}
+                            />
+                            <div>
+                                <img src={profilePhoto} alt="Profile" style={{width: '50px', height: '50px', borderRadius: '50%'}} />
+                                <input type="file" onChange={handleFileChange} accept="image/*" />
+                            </div>
+                        </>
+                    )}
+
+                    <button type="submit">{isLogin ? 'Login' : 'Sign Up'}</button>
+                </form>
+                <button onClick={() => setIsLogin(!isLogin)}>
+                    {isLogin ? 'Need an account?' : 'Already have an account?'}
+                </button>
+            </div>
+        );
+    };
+
+export default AuthenticationSystem;
 document.addEventListener('DOMContentLoaded', () => {
     const bootScreen = document.getElementById('boot-screen');
     const versaiaLogo = document.getElementById('versaia-logo');
