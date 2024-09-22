@@ -255,7 +255,7 @@
     </style>
 </head>
 <body>
-    <div id="boot-screen">
+    <div id="boot-screen" style="display: block;">
         <div class="boot-content">
             <p id="tap-to-continue">Tap anywhere to continue</p>
             <div id="versaia-logo" class="logo-container">
@@ -281,11 +281,13 @@
                 <p id="boot-message">System Initializing...</p>
             </div>
         </div>
-            <div id="login-screen" style="display: none;">
-        <h2>Welcome to VERSAIA OS</h2>
-        <div id="auth-root"></div>
+
     </div>
     </div>
+<!-- Login Screen -->
+<div id="loginScreen" style="display: none;">
+    <div id="auth-root"></div>
+</div>
 
 
 
@@ -438,10 +440,6 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <script type="text/javascript">
-    const { useState } = React;
-    const { User, Lock, Key, Fingerprint } = lucideReact;
-
-
     // Function to show the login screen after boot screen finishes
     function showLoginScreen() {
         document.getElementById("bootScreen").style.display = "none";
@@ -454,183 +452,129 @@ document.addEventListener('DOMContentLoaded', () => {
             showLoginScreen();
         }, 3000); // Adjust the delay as needed for the boot screen
     };
-    const AuthenticationSystem = () => {
-        const [isLogin, setIsLogin] = useState(true);
-        const [authMethod, setAuthMethod] = useState('password');
-        const [profilePhoto, setProfilePhoto] = useState('/api/placeholder/150/150');
-        const [email, setEmail] = useState('');
-        const [password, setPassword] = useState('');
-        const [fullName, setFullName] = useState('');
-        const [birthdate, setBirthdate] = useState('');
-        const [gender, setGender] = useState('');
-        const [address, setAddress] = useState('');
-        const [bio, setBio] = useState('');
 
-        const handleSubmit = async (e) => {
-            e.preventDefault();
-            console.log('Form submitted');
+    let isLogin = true;
+    let authMethod = 'password';
+    let profilePhoto = '/api/placeholder/150/150';
 
-            const url = isLogin ? '/login' : '/register';
-            const data = isLogin
-                ? { email, password }
-                : { email, password, fullName, birthdate, gender, address, bio };
+    const handleSubmit = async (e) => {
+        e.preventDefault();
 
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data),
-                });
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        const fullName = document.getElementById("fullName").value;
+        const birthdate = document.getElementById("birthdate").value;
+        const gender = document.getElementById("gender").value;
+        const address = document.getElementById("address").value;
+        const bio = document.getElementById("bio").value;
 
-                if (response.ok) {
-                    const result = await response.json();
-                    alert(result.message);
-                    if (!isLogin) {
-                        setIsLogin(true); // Switch to login view after successful signup
-                    } else {
-                        document.getElementById('login-screen').style.display = 'none';
-                        window.location.href = 'https://shadowjhakx98.github.io/Versaia/homepage.html';
-                    }
+        const url = isLogin ? '/login' : '/register';
+        const data = isLogin
+            ? { email, password }
+            : { email, password, fullName, birthdate, gender, address, bio };
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                alert(result.message);
+                if (!isLogin) {
+                    isLogin = true; // Switch to login view after successful signup
+                    renderForm();
                 } else {
-                    const errorData = await response.json();
-                    alert(errorData.error || 'Operation failed. Please try again.');
+                    document.getElementById('login-screen').style.display = 'none';
+                    window.location.href = 'https://shadowjhakx98.github.io/Versaia/homepage.html';
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('An error occurred. Please try again later.');
+            } else {
+                const errorData = await response.json();
+                alert(errorData.error || 'Operation failed. Please try again.');
             }
-        };
-
-        const handleFileChange = (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    setProfilePhoto(reader.result);
-                };
-                reader.readAsDataURL(file);
-            }
-        };
-
-        return React.createElement(
-            "div",
-            { className: "auth-system" },
-            React.createElement("h2", null, isLogin ? 'Login' : 'Sign Up'),
-            React.createElement(
-                "form",
-                { onSubmit: handleSubmit },
-                React.createElement(
-                    "div",
-                    null,
-                    React.createElement(
-                        "button",
-                        { type: "button", onClick: () => setAuthMethod('password') },
-                        React.createElement(Lock, { size: 16 })
-                    ),
-                    React.createElement(
-                        "button",
-                        { type: "button", onClick: () => setAuthMethod('pin') },
-                        React.createElement(Key, { size: 16 })
-                    ),
-                    React.createElement(
-                        "button",
-                        { type: "button", onClick: () => setAuthMethod('passkey') },
-                        React.createElement(Fingerprint, { size: 16 })
-                    ),
-                    React.createElement(
-                        "button",
-                        { type: "button", onClick: () => setAuthMethod('windows') },
-                        React.createElement(User, { size: 16 })
-                    )
-                ),
-                authMethod === 'password' && React.createElement(
-                    React.Fragment,
-                    null,
-                    React.createElement("input", {
-                        type: "email",
-                        placeholder: "Email",
-                        value: email,
-                        onChange: (e) => setEmail(e.target.value)
-                    }),
-                    React.createElement("input", {
-                        type: "password",
-                        placeholder: "Password",
-                        value: password,
-                        onChange: (e) => setPassword(e.target.value)
-                    })
-                ),
-                authMethod === 'pin' && React.createElement("input", { type: "password", placeholder: "PIN", maxLength: 4, required: true }),
-                authMethod === 'passkey' && React.createElement("button", { type: "button" }, "Use Passkey"),
-                authMethod === 'windows' && React.createElement("button", { type: "button" }, "Use Windows Hello"),
-                !isLogin && React.createElement(
-                    React.Fragment,
-                    null,
-                    React.createElement("input", {
-                        type: "text",
-                        placeholder: "Full Name",
-                        required: true,
-                        value: fullName,
-                        onChange: (e) => setFullName(e.target.value)
-                    }),
-                    React.createElement("input", {
-                        type: "date",
-                        required: true,
-                        value: birthdate,
-                        onChange: (e) => setBirthdate(e.target.value)
-                    }),
-                    React.createElement("select", {
-                        required: true,
-                        value: gender,
-                        onChange: (e) => setGender(e.target.value)
-                    },
-                        React.createElement("option", { value: "" }, "Select gender"),
-                        React.createElement("option", { value: "male" }, "Male"),
-                        React.createElement("option", { value: "female" }, "Female"),
-                        React.createElement("option", { value: "other" }, "Other"),
-                        React.createElement("option", { value: "prefer-not-to-say" }, "Prefer not to say")
-                    ),
-                    React.createElement("input", {
-                        type: "text",
-                        placeholder: "Address",
-                        required: true,
-                        value: address,
-                        onChange: (e) => setAddress(e.target.value)
-                    }),
-                    React.createElement("input", {
-                        type: "text",
-                        placeholder: "Tell us about yourself",
-                        value: bio,
-                        onChange: (e) => setBio(e.target.value)
-                    }),
-                    React.createElement(
-                        "div",
-                        null,
-                        React.createElement("img", {
-                            src: profilePhoto,
-                            alt: "Profile",
-                            style: { width: '50px', height: '50px', borderRadius: '50%' }
-                        }),
-                        React.createElement("input", {
-                            type: "file",
-                            onChange: handleFileChange,
-                            accept: "image/*"
-                        })
-                    )
-                ),
-                React.createElement("button", { type: "submit" }, isLogin ? 'Login' : 'Sign Up')
-            ),
-            React.createElement(
-                "button",
-                { onClick: () => setIsLogin(!isLogin) },
-                isLogin ? 'Need an account?' : 'Already have an account?'
-            )
-        );
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again later.');
+        }
     };
 
-    ReactDOM.render(React.createElement(AuthenticationSystem), document.getElementById('auth-root'));
-</script>
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                profilePhoto = reader.result;
+                document.getElementById("profileImage").src = profilePhoto;
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const setAuthMethod = (method) => {
+        authMethod = method;
+        renderForm();
+    };
+
+    const toggleLogin = () => {
+        isLogin = !isLogin;
+        renderForm();
+    };
+
+    const renderForm = () => {
+        let formHTML = `
+            <h2>${isLogin ? 'Login' : 'Sign Up'}</h2>
+            <form onsubmit="handleSubmit(event)">
+                <div>
+                    <button type="button" onclick="setAuthMethod('password')">🔒</button>
+                    <button type="button" onclick="setAuthMethod('pin')">🔑</button>
+                    <button type="button" onclick="setAuthMethod('passkey')">🖐</button>
+                    <button type="button" onclick="setAuthMethod('windows')">👤</button>
+                </div>`;
+
+        if (authMethod === 'password') {
+            formHTML += `
+                <input type="email" id="email" placeholder="Email" required>
+                <input type="password" id="password" placeholder="Password" required>`;
+        } else if (authMethod === 'pin') {
+            formHTML += `<input type="password" placeholder="PIN" maxlength="4" required>`;
+        } else if (authMethod === 'passkey') {
+            formHTML += `<button type="button">Use Passkey</button>`;
+        } else if (authMethod === 'windows') {
+            formHTML += `<button type="button">Use Windows Hello</button>`;
+        }
+
+        if (!isLogin) {
+            formHTML += `
+                <input type="text" id="fullName" placeholder="Full Name" required>
+                <input type="date" id="birthdate" required>
+                <select id="gender" required>
+                    <option value="">Select gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                    <option value="prefer-not-to-say">Prefer not to say</option>
+                </select>
+                <input type="text" id="address" placeholder="Address" required>
+                <input type="text" id="bio" placeholder="Tell us about yourself">
+                <div>
+                    <img src="${profilePhoto}" alt="Profile" id="profileImage" style="width:50px;height:50px;border-radius:50%;">
+                    <input type="file" onchange="handleFileChange(event)" accept="image/*">
+                </div>`;
+        }
+
+        formHTML += `<button type="submit">${isLogin ? 'Login' : 'Sign Up'}</button></form>`;
+        formHTML += `<button onclick="toggleLogin()">${isLogin ? 'Need an account?' : 'Already have an account?'}</button>`;
+
+        document.getElementById("auth-root").innerHTML = formHTML;
+    };
+
+    window.onload = function() {
+        renderForm(); // Render the form after the page loads
+    };
 
    </script>
 </body>
