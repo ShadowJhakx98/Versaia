@@ -6,7 +6,6 @@
     <title>VERSAIA OS</title>
     <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/lucide.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
@@ -424,44 +423,60 @@ document.addEventListener('DOMContentLoaded', () => {
         biosSettings.style.display = 'block';
     }
 
-        function showLoginScreen() {
-            bootScreen.style.opacity = '0';
-            setTimeout(() => {
-                bootScreen.style.display = 'none';
-                loginScreen.style.display = 'block';
-                body.classList.add('loaded');
-            }, 1000);
-        }
-    });
+    // Simulate boot screen completion with a delay or trigger an event at the end of the animation
+    window.onload = function() {
+        setTimeout(function() {
+            // Hide the boot screen
+            document.getElementById("bootScreen").style.display = "none";
+          
+            // Show the login screen
+            document.getElementById("loginScreen").style.display = "block";
+        }, 3000); // This is a 3-second delay, adjust as needed
+    };
+        });
 
 </script>
-   <script type="text/babel">
-        const { useState } = React;
-        const { User, Lock, Key, Fingerprint, Calendar, MapPin, Image } = lucide;
 
-        const AuthenticationSystem = () => {
-            const [isLogin, setIsLogin] = useState(true);
-            const [authMethod, setAuthMethod] = useState('password');
-            const [profilePhoto, setProfilePhoto] = useState('/api/placeholder/150/150');
-            const [email, setEmail] = useState('');
-            const [password, setPassword] = useState('');
-            const [fullName, setFullName] = useState('');
-            const [birthdate, setBirthdate] = useState('');
-            const [gender, setGender] = useState('');
-            const [address, setAddress] = useState('');
-            const [bio, setBio] = useState('');
-            
-            const handleSubmit = async (e) => {
-                e.preventDefault();
-                console.log('Form submitted');
+<script type="text/javascript">
+    const { useState } = React;
+    const { User, Lock, Key, Fingerprint } = lucideReact;
 
-                const url = isLogin ? '/login' : '/register';
-                const data = isLogin 
-                    ? { email, password }
-                    : { email, password, fullName, birthdate, gender, address, bio };
 
-                try {
-                    const response = await fetch(url, {
+    // Function to show the login screen after boot screen finishes
+    function showLoginScreen() {
+        document.getElementById("bootScreen").style.display = "none";
+        document.getElementById("loginScreen").style.display = "block";
+    }
+
+    // Call the showLoginScreen function after the page loads (i.e., boot screen finishes)
+    window.onload = function() {
+        setTimeout(function() {
+            showLoginScreen();
+        }, 3000); // Adjust the delay as needed for the boot screen
+    };
+    const AuthenticationSystem = () => {
+        const [isLogin, setIsLogin] = useState(true);
+        const [authMethod, setAuthMethod] = useState('password');
+        const [profilePhoto, setProfilePhoto] = useState('/api/placeholder/150/150');
+        const [email, setEmail] = useState('');
+        const [password, setPassword] = useState('');
+        const [fullName, setFullName] = useState('');
+        const [birthdate, setBirthdate] = useState('');
+        const [gender, setGender] = useState('');
+        const [address, setAddress] = useState('');
+        const [bio, setBio] = useState('');
+
+        const handleSubmit = async (e) => {
+            e.preventDefault();
+            console.log('Form submitted');
+
+            const url = isLogin ? '/login' : '/register';
+            const data = isLogin
+                ? { email, password }
+                : { email, password, fullName, birthdate, gender, address, bio };
+
+            try {
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -473,7 +488,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const result = await response.json();
                     alert(result.message);
                     if (!isLogin) {
-                         setIsLogin(true); // Switch to login view after successful signup
+                        setIsLogin(true); // Switch to login view after successful signup
                     } else {
                         document.getElementById('login-screen').style.display = 'none';
                         window.location.href = 'https://shadowjhakx98.github.io/Versaia/homepage.html';
@@ -499,101 +514,124 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        return (
-            <div className="auth-system">
-                <h2>{isLogin ? 'Login' : 'Sign Up'}</h2>
-                <form onSubmit={handleSubmit}>
-                    {/* Authentication method tabs */}
-                    <div>
-                        <button type="button" onClick={() => setAuthMethod('password')}><Lock size={16} /></button>
-                        <button type="button" onClick={() => setAuthMethod('pin')}><Key size={16} /></button>
-                        <button type="button" onClick={() => setAuthMethod('passkey')}><Fingerprint size={16} /></button>
-                        <button type="button" onClick={() => setAuthMethod('windows')}><User size={16} /></button>
-                    </div>
-
-                    {/* Authentication fields based on selected method */}
-                    {authMethod === 'password' && (
-                      <React.Fragment>
-                        <input 
-                          type="email" 
-                          placeholder="Email" 
-                          value={email} 
-                          onChange={(e) => setEmail(e.target.value)} 
-                        />
-                        <input 
-                          type="password" 
-                          placeholder="Password" 
-                          value={password} 
-                          onChange={(e) => setPassword(e.target.value)} 
-                        />
-                      </React.Fragment>
-                    )}
-                    {authMethod === 'pin' && (
-                        <input type="password" placeholder="PIN" maxLength={4} required />
-                    )}
-                    {authMethod === 'passkey' && (
-                        <button type="button">Use Passkey</button>
-                    )}
-                    {authMethod === 'windows' && (
-                        <button type="button">Use Windows Hello</button>
-                    )}
-
-                    {/* Additional fields for sign up */}
-                    {!isLogin && (
-                        <>
-                            <input 
-                                type="text" 
-                                placeholder="Full Name" 
-                                required 
-                                value={fullName}
-                                onChange={(e) => setFullName(e.target.value)}
-                            />
-                            <input 
-                                type="date" 
-                                required 
-                                value={birthdate}
-                                onChange={(e) => setBirthdate(e.target.value)}
-                            />
-                            <select 
-                                required
-                                value={gender}
-                                onChange={(e) => setGender(e.target.value)}
-                            >
-                                <option value="">Select gender</option>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                                <option value="other">Other</option>
-                                <option value="prefer-not-to-say">Prefer not to say</option>
-                            </select>
-                            <input 
-                                type="text" 
-                                placeholder="Address" 
-                                required 
-                                value={address}
-                                onChange={(e) => setAddress(e.target.value)}
-                            />
-                            <input 
-                                type="text" 
-                                placeholder="Tell us about yourself" 
-                                value={bio}
-                                onChange={(e) => setBio(e.target.value)}
-                            />
-                            <div>
-                                <img src={profilePhoto} alt="Profile" style={{width: '50px', height: '50px', borderRadius: '50%'}} />
-                                <input type="file" onChange={handleFileChange} accept="image/*" />
-                            </div>
-                        </>
-                    )}
-
-                    <button type="submit">{isLogin ? 'Login' : 'Sign Up'}</button>
-                </form>
-                <button onClick={() => setIsLogin(!isLogin)}>
-                    {isLogin ? 'Need an account?' : 'Already have an account?'}
-                </button>
-            </div>
+        return React.createElement(
+            "div",
+            { className: "auth-system" },
+            React.createElement("h2", null, isLogin ? 'Login' : 'Sign Up'),
+            React.createElement(
+                "form",
+                { onSubmit: handleSubmit },
+                React.createElement(
+                    "div",
+                    null,
+                    React.createElement(
+                        "button",
+                        { type: "button", onClick: () => setAuthMethod('password') },
+                        React.createElement(Lock, { size: 16 })
+                    ),
+                    React.createElement(
+                        "button",
+                        { type: "button", onClick: () => setAuthMethod('pin') },
+                        React.createElement(Key, { size: 16 })
+                    ),
+                    React.createElement(
+                        "button",
+                        { type: "button", onClick: () => setAuthMethod('passkey') },
+                        React.createElement(Fingerprint, { size: 16 })
+                    ),
+                    React.createElement(
+                        "button",
+                        { type: "button", onClick: () => setAuthMethod('windows') },
+                        React.createElement(User, { size: 16 })
+                    )
+                ),
+                authMethod === 'password' && React.createElement(
+                    React.Fragment,
+                    null,
+                    React.createElement("input", {
+                        type: "email",
+                        placeholder: "Email",
+                        value: email,
+                        onChange: (e) => setEmail(e.target.value)
+                    }),
+                    React.createElement("input", {
+                        type: "password",
+                        placeholder: "Password",
+                        value: password,
+                        onChange: (e) => setPassword(e.target.value)
+                    })
+                ),
+                authMethod === 'pin' && React.createElement("input", { type: "password", placeholder: "PIN", maxLength: 4, required: true }),
+                authMethod === 'passkey' && React.createElement("button", { type: "button" }, "Use Passkey"),
+                authMethod === 'windows' && React.createElement("button", { type: "button" }, "Use Windows Hello"),
+                !isLogin && React.createElement(
+                    React.Fragment,
+                    null,
+                    React.createElement("input", {
+                        type: "text",
+                        placeholder: "Full Name",
+                        required: true,
+                        value: fullName,
+                        onChange: (e) => setFullName(e.target.value)
+                    }),
+                    React.createElement("input", {
+                        type: "date",
+                        required: true,
+                        value: birthdate,
+                        onChange: (e) => setBirthdate(e.target.value)
+                    }),
+                    React.createElement("select", {
+                        required: true,
+                        value: gender,
+                        onChange: (e) => setGender(e.target.value)
+                    },
+                        React.createElement("option", { value: "" }, "Select gender"),
+                        React.createElement("option", { value: "male" }, "Male"),
+                        React.createElement("option", { value: "female" }, "Female"),
+                        React.createElement("option", { value: "other" }, "Other"),
+                        React.createElement("option", { value: "prefer-not-to-say" }, "Prefer not to say")
+                    ),
+                    React.createElement("input", {
+                        type: "text",
+                        placeholder: "Address",
+                        required: true,
+                        value: address,
+                        onChange: (e) => setAddress(e.target.value)
+                    }),
+                    React.createElement("input", {
+                        type: "text",
+                        placeholder: "Tell us about yourself",
+                        value: bio,
+                        onChange: (e) => setBio(e.target.value)
+                    }),
+                    React.createElement(
+                        "div",
+                        null,
+                        React.createElement("img", {
+                            src: profilePhoto,
+                            alt: "Profile",
+                            style: { width: '50px', height: '50px', borderRadius: '50%' }
+                        }),
+                        React.createElement("input", {
+                            type: "file",
+                            onChange: handleFileChange,
+                            accept: "image/*"
+                        })
+                    )
+                ),
+                React.createElement("button", { type: "submit" }, isLogin ? 'Login' : 'Sign Up')
+            ),
+            React.createElement(
+                "button",
+                { onClick: () => setIsLogin(!isLogin) },
+                isLogin ? 'Need an account?' : 'Already have an account?'
+            )
         );
     };
-     ReactDOM.render(<AuthenticationSystem />, document.getElementById('auth-root'));
+
+    ReactDOM.render(React.createElement(AuthenticationSystem), document.getElementById('auth-root'));
+</script>
+
    </script>
 </body>
 </html>
