@@ -410,7 +410,10 @@ document.addEventListener('DOMContentLoaded', () => {
             loadingProgress.style.width = `${progress}%`;
             if (progress >= 100) {
                 clearInterval(progressInterval);
-                setTimeout(showLoginScreen, 2000); // Wait for the last message to be displayed
+                setTimeout(() => {
+                    // Redirect to the homepage after the boot sequence is complete
+                    window.location.href = 'https://shadowjhakx98.github.io/Versaia/homepage.html';
+                }, 2000); // Wait for 2 seconds after the progress reaches 100%
             }
         }, 600); // 60 seconds total
     }
