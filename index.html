@@ -39,14 +39,23 @@
             text-align: center;
             position: relative;
             z-index: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 100%;
         }
 
-        /* Remove any top margin that might be pushing the content down */
         .logo-container {
             margin-bottom: 30px;
-            margin-top: 0;
+        }z
+        #versaia-logo, #nvidia-logo, #amd-logo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
-
         .boot-logo {
             width: 180px;
             height: 180px;
@@ -54,7 +63,12 @@
             box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
             transition: all 0.3s ease;
         }
-
+        #boot-sequence {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
         .boot-logo:hover {
             transform: scale(1.05);
             box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
@@ -69,10 +83,10 @@
         }
 
         .loading-container {
-            position: relative;
             width: 300px;
             margin: 30px auto;
         }
+
 
         .aurora {
             position: absolute;
@@ -200,7 +214,7 @@
         /* Ensure the tap-to-continue message is positioned relative to the boot-content */
         #tap-to-continue {
             position: absolute;
-            bottom: -60px; /* Adjust this value as needed */
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
             font-size: 16px;
@@ -214,6 +228,12 @@
             50% { opacity: 1; }
             100% { opacity: 0.7; }
         }
+        /* Ensure all direct children of boot-content are centered */
+        .boot-content > * {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
 
     </style>
 </head>
