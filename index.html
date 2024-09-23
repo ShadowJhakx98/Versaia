@@ -41,8 +41,10 @@
             z-index: 2;
         }
 
+        /* Remove any top margin that might be pushing the content down */
         .logo-container {
             margin-bottom: 30px;
+            margin-top: 0;
         }
 
         .boot-logo {
@@ -195,9 +197,10 @@
             box-shadow: 0 4px 10px rgba(0, 255, 0, 0.2);
         }
 
+        /* Ensure the tap-to-continue message is positioned relative to the boot-content */
         #tap-to-continue {
             position: absolute;
-            bottom: 30px;
+            bottom: -60px; /* Adjust this value as needed */
             left: 50%;
             transform: translateX(-50%);
             font-size: 16px;
